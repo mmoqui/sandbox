@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<publication>
+  <name>Tartempion et toi</name>
+  <author>Toto chez-les-papoos</author>
+  <description>Une publication pour tester la génération d'un document ODT</description>
+  <content><![CDATA[Dans le cadre du développement de widgets AJAX sur les commentaires, le
+framework Jersey a été introduit dans Silverpeas avec pour objectif d'exposer, sous forme de
+services Web de type REST (de préférence RESTful), les ressources gérées par Silverpeas
+(publications, images, commentaires, etc.) ; ceci permet l'accès à ces ressources en AJAX à
+partir de l'IHM.
+La force de développer une telle couche service est de pouvoir satisfaire deux
+besoins de façon homogène :
+–
+étendre les appels AJAX dans la couche IHM de Silverpeas afin d'améliorer
+l'interactivité ; il s'agit donc de remplacer les widgets en JSP par leurs équivalents en
+javascript (sans présager de la technologie utilisée), quitte à les encapsuler par des
+tags JSTL.
+–
+remplacer les appels aux EJB et les widgets graphiques dans la taglib website par
+respectivement des appels HTTP et des widgets en javascript.
+Mais aussi d'être en mesure de monter plus facilement en charge.
+Ainsi, avec une couche de service Web selon l'approche architecturale REST, il s'agit
+de permettre aussi bien à des sites Web extérieurs qu'à la couche graphique de Silverpeas de
+pouvoir interroger les objets métiers ; il améliore la séparation des responsabilités de la
+couche Web d'avec celle métier de Silverpeas.
+L'écriture d'un premier service Web REST pour publier sur le Web les commentaires a
+permis de mettre en place d'une part les frameworks qui facilitent le développement et les
+tests de tels services, et d'autre part de dessiner une première version d'une API pour la
+réalisation et les tests de services Web dans Silverpeas.]]></content>
+  <comments>
+    <comment>
+      <date>2011-04-24T09:38:53Z</date>
+      <author>Bart Simpson</author>
+      <text>C'est cool</text>
+    </comment>
+    <comment>
+      <date>2011-04-26T09:38:53Z</date>
+      <author>Lopsi</author>
+      <text>Alors ? Est ce que ça marche ?</text>
+    </comment>
+  </comments>
+  <attachments/>
+</publication>
