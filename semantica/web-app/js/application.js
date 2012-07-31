@@ -6,4 +6,4 @@ if (typeof jQuery !== 'undefined') {
 			$(this).fadeOut();
 		});
 	})(jQuery);
-}
+} 

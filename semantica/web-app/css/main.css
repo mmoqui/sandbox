@@ -47,8 +47,10 @@ body {
 	        box-shadow: 0 0 0.3em #255b17;
 }
 
-#grailsLogo {
+#semanticaLogo {
 	background-color: #abbf78;
+    font-size: 38px;
+    font-weight: bold;
 }
 
 /* replace with .no-boxshadow body if you have modernizr available */
@@ -89,7 +91,7 @@ img {
 
 /* GENERAL */
 
-#grailsLogo a {
+#semanticaLogo a {
 	display: inline-block;
 	margin: 1em;
 }
