@@ -19,13 +19,16 @@
 		<r:layoutResources />
 	</head>
 	<body>
-		<!-- <div id="semanticaLogo" role="banner"><a href="#"><img src="${resource(dir: 'images', file: 'grails_logo.png')}" alt="Semantica"/></a></div> -->
-        <div id="semanticaLogo" role="banner">Semantica</div>
-		<div id="menu">
-          <div id="search" class="item"><g:link controller="contentSearch"> Search a content</g:link></div>
-          <div id="upload" class="item"><g:link controller="fileUpload"> Upload a file</g:link></div>
-        </div>
-        <g:layoutBody/>
+    <div id="semanticaLogo" role="banner"><g:link><img src="${resource(dir: 'images', file: 'semantica-logo.png')}" alt="Semantica"/></g:link>Semantica</div>
+    <div id="menu" class="nav">
+		  <ul>
+          <li id="search"><g:link class="list" controller="contentSearch"> Search a content</g:link></li>
+          <li id="upload"><g:link class="create" controller="fileUpload"> Upload a file</g:link></li>
+      </ul>
+    </div>
+    <div id="body">
+      <g:layoutBody/>
+    </div>
 		<div class="footer" role="contentinfo"></div>
 		<div id="spinner" class="spinner" style="display:none;"><g:message code="spinner.alt" default="Loading&hellip;"/></div>
 		<g:javascript library="application"/>
