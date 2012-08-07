@@ -32,11 +32,14 @@ grails.project.dependency.resolution = {
     //mavenRepo "http://repository.jboss.com/maven2/"
   }
   dependencies {
-    // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
+    // Jersey dependency to communicate with the REST-like WEB API
     compile 'com.sun.jersey:jersey-client:1.13'
     compile 'com.sun.jersey:jersey-core:1.13'
     compile 'com.sun.jersey.contribs:jersey-multipart:1.13'
-    // runtime 'mysql:mysql-connector-java:5.1.20'
+    // Tika dependency to parse text document
+    compile 'org.apache.tika:tika-parsers:1.2'
+    // Carrot² dependency to cluster search results
+    compile 'org.carrot2:carrot2-core:3.6.0'
   }
 
   plugins {

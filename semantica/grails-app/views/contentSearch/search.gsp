@@ -23,11 +23,11 @@
     var query = $("#search input[name='query']").val()
     $.ajax("${request.contextPath}/contentSearch/search?query=" + query, {
       type:'GET',
-      success:function (contents) {
+      success:function (searchResult) {
         $("#results").children().remove();
-        if (contents.length != 0) {
+        if (searchResult.length != 0) {
           var results = $("<ul>").hide().appendTo("#results");
-          $.each(contents, function (i, aContent) {
+          $.each(searchResult, function (i, aContent) {
                 $("<li>", {'id':aContent.id}).append($("<a>", {href:"${request.contextPath}/contentSearch/get?id=" + aContent.id}).append(aContent.name)
                 ).
                     appendTo(results);
@@ -40,7 +40,6 @@
         }
       },
       error:function (jqXHR, textStatus, errorThrown) {
-        alert(errorThrown);
         $("body").children().remove();
         $("body").html(jqXHR.responseText);
       }

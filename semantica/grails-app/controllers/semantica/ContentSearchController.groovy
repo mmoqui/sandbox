@@ -22,7 +22,7 @@ class ContentSearchController {
     if (!query.trim().isEmpty()) {
       contents = contentService.findByQuery(query)
     } else {
-      contents = []
+      contents = new SearchResult()
     }
     render contents as JSON
   }

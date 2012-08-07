@@ -9,9 +9,11 @@ class ContentStorageDescriptor {
 
   static constraints = {
     name unique: true
+    description blank: true, nullable: true
     location blank: false
   }
   
   String name
+  String description
   String location
 }
