@@ -22,7 +22,7 @@ class FileUploadController {
     if (file.empty) {
       flash.message = 'File cannot be empty'
     } else {
-      def content;
+      def content
       if (fileName.toLowerCase().endsWith('.zip')) {
         int suffixIndex = fileName.lastIndexOf(".")
         content = File.createTempFile(fileName.substring(0, suffixIndex), fileName.substring(suffixIndex))
