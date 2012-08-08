@@ -14,6 +14,12 @@ import org.carrot2.core.ProcessingResult
 import javax.ws.rs.core.MediaType
 import javax.persistence.PersistenceException
 import org.carrot2.core.LanguageCode
+import org.carrot2.source.solr.SolrDocumentSourceDescriptor
+import org.carrot2.core.ProcessingComponentConfiguration
+import org.carrot2.source.solr.SolrDocumentSource
+import org.carrot2.core.attribute.CommonAttributesDescriptor
+import grails.converters.XML
+import groovy.xml.StreamingMarkupBuilder
 
 class ContentClassificationService {
 
@@ -31,7 +37,9 @@ class ContentClassificationService {
   def classify(document, descriptor) {
     String query = "literal.id=${descriptor.id}&literal.stored=true"
     descriptor.properties.grep { !['class', 'metaClass', 'active', 'id'].contains(it.key) }.each {
-      if (it.value instanceof String)
+      if (it.key == 'location') {
+        query += "&literal.url=file:${URLEncoder.encode(it.value, 'UTF-8')}"
+      } else if (it.value instanceof String)
         query += "&literal.${it.key}=${URLEncoder.encode(it.value, 'UTF-8')}"
       else
         query += "&literal.${it.key}=${it.value}"
@@ -50,65 +58,50 @@ class ContentClassificationService {
 
   /**
    * Searches the contents that match the specified query.
+   * The contents are clustered into one or more categories according to their common hidden
+   * properties.
    * @param query the text of the query.
    * @return a list of search results, each of them referring a particular classified
    * content. The descriptor has at least as properties the unique identifier and the name of the
    * classified content.
    */
   def search(String query) {
-    // requests the search engine for the documents matching the query
-    WebResource solr = client.resource(grailsApplication.config.solr.url +
-        "select/?q=${URLEncoder.encode(query, 'UTF-8')}&fl=*,score&indent=on&wt=json")
-    def results = JSON.parse(
-        solr.accept(MediaType.APPLICATION_JSON).
-            get(String.class))
-    if (results.responseHeader.status != 0) {
-      throw new RuntimeException("The query ${query} has failed (status = ${results.responseHeader.status})")
-    }
-
-    // clusters the returned documents with Carrot²
-    def docs = results.response.docs.grep { it.stored }
-    def clusters = clustersDocuments(docs.collect { doc ->
-      String summary = doc.description
-      if (!summary && doc.subject) {
-        summary = doc.subject
-      }
-      new Document(doc.name, summary, "file:${doc.location}", LanguageCode.FRENCH).setField("id", doc.id)
-    }, query)
-    return searchResultWith(docs, clusters)
-  }
-
-  /**
-   * Applies a clustering algorithm on the specified documents sent back by the specified query.
-   * The clustering algorithm is only applied if there is more than 10 documents to categorize.
-   * @param documents the documents to categorize into one or more clusters.
-   * @param query the search query at the origin of the documents fetching.
-   * @return the resulted clusters or an empty list if either no clusters were found or there is
-   * less than or equal to 10 documents.
-   */
-  private def clustersDocuments(documents, query) {
-    if (documents.size >= 10) {
-      Controller controller = ControllerFactory.createSimple()
-      ProcessingResult results = controller.process(documents, query, LingoClusteringAlgorithm.class)
-      return (results.clusters ? results.clusters : [])
-    }
-    return []
+    Controller controller = ControllerFactory.createPooling()
+    Map<String, Object> globalSolrAttributes = [:]
+    SolrDocumentSourceDescriptor.attributeBuilder(globalSolrAttributes).
+        serviceUrlBase(grailsApplication.config.solr.url + 'select').
+        solrSummaryFieldName("description").
+        solrTitleFieldName("name").
+        solrUrlFieldName("url")
+    controller.init(new HashMap<String, Object>(),
+        new ProcessingComponentConfiguration(SolrDocumentSource.class, "solr", globalSolrAttributes))
+    Map<String, Object> processingAttributes = [:]
+    CommonAttributesDescriptor.attributeBuilder(processingAttributes).query(query)
+    ProcessingResult results = controller.process(processingAttributes, "solr", LingoClusteringAlgorithm.class.name)
+    return searchResultWith(results.documents, results.clusters)
   }
 
   private def searchResultWith(contents, clusters) {
-    if (!clusters.empty) {
-      def searchResultClusters = clusters.collect {
-        new SearchResultCluster(label: it.label, contents:
-          it.allDocuments.collect { Document doc ->
-            ContentStorageDescriptor descriptor = ContentStorageDescriptor.get(doc.getField("id"))
-            if (descriptor == null)
-              throw new PersistenceException("Descriptor of content ${doc.title} (id=${doc.getField("id")}) not found!")
-            descriptor
-          })
-      }
-      return new SearchResult(contents: contents, clusters: searchResultClusters)
-    } else {
-      return new SearchResult(contents: contents, clusters: [])
+    def searchResultContents = contents.collect { doc ->
+      ContentStorageDescriptor descriptor = ContentStorageDescriptor.findByName(doc.title)
+      if (descriptor == null)
+        throw new PersistenceException("Descriptor of content ${doc.title} not found!")
+      descriptor
     }
+    def searchResultClusters
+    if (!clusters.empty && contents.size() >= 10) {
+      searchResultClusters = clusters.collect {
+        new SearchResultCluster(label: it.label, contents:
+            it.allDocuments.collect { Document doc ->
+              ContentStorageDescriptor descriptor = ContentStorageDescriptor.findByName(doc.title)
+              if (descriptor == null)
+                throw new PersistenceException("Descriptor of content ${doc.title} not found!")
+              descriptor
+            })
+      }
+    } else {
+      searchResultClusters = []
+    }
+    return new SearchResult(contents: searchResultContents, clusters: searchResultClusters)
   }
 }

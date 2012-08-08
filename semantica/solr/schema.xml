@@ -914,6 +914,11 @@
    <field name="stored" type="boolean" indexed="false" stored="true"/>
 
    <!--
+    URL at which a document can be found. Required by Semantica
+   -->
+   <field name="url" type="string" indexed="false" stored="true"/>
+
+   <!--
    The following store examples are used to demonstrate the various ways one might _CHOOSE_ to
     implement spatial.  It is highly unlikely that you would ever have ALL of these fields defined.
     -->
