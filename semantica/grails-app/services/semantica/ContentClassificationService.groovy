@@ -12,6 +12,8 @@ import org.carrot2.core.Document
 import org.carrot2.core.ProcessingResult
 
 import javax.ws.rs.core.MediaType
+import javax.persistence.PersistenceException
+import org.carrot2.core.LanguageCode
 
 class ContentClassificationService {
 
@@ -63,12 +65,17 @@ class ContentClassificationService {
     if (results.responseHeader.status != 0) {
       throw new RuntimeException("The query ${query} has failed (status = ${results.responseHeader.status})")
     }
-    println results
 
     // clusters the returned documents with Carrot²
     def docs = results.response.docs.grep { it.stored }
-    def clusters = clustersDocuments(docs.collect { new Document(it.name, it.description) }, query)
-    return new SearchResult(contents: docs, clusters: clusters)
+    def clusters = clustersDocuments(docs.collect { doc ->
+      String summary = doc.description
+      if (!summary && doc.subject) {
+        summary = doc.subject
+      }
+      new Document(doc.name, summary, "file:${doc.location}", LanguageCode.FRENCH).setField("id", doc.id)
+    }, query)
+    return searchResultWith(docs, clusters)
   }
 
   /**
@@ -83,9 +90,25 @@ class ContentClassificationService {
     if (documents.size >= 10) {
       Controller controller = ControllerFactory.createSimple()
       ProcessingResult results = controller.process(documents, query, LingoClusteringAlgorithm.class)
-      return results.clusters
+      return (results.clusters ? results.clusters : [])
     }
     return []
   }
 
+  private def searchResultWith(contents, clusters) {
+    if (!clusters.empty) {
+      def searchResultClusters = clusters.collect {
+        new SearchResultCluster(label: it.label, contents:
+          it.allDocuments.collect { Document doc ->
+            ContentStorageDescriptor descriptor = ContentStorageDescriptor.get(doc.getField("id"))
+            if (descriptor == null)
+              throw new PersistenceException("Descriptor of content ${doc.title} (id=${doc.getField("id")}) not found!")
+            descriptor
+          })
+      }
+      return new SearchResult(contents: contents, clusters: searchResultClusters)
+    } else {
+      return new SearchResult(contents: contents, clusters: [])
+    }
+  }
 }

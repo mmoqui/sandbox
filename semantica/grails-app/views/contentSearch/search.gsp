@@ -19,22 +19,39 @@
 <div id="results">
 </div>
 <g:javascript>
+  // renders the specified contents into the specified target HTML element.
+  function renderContents(contents, target) {
+    var list = $("<ul>").hide().appendTo(target);
+    $.each(contents, function (i, aContent) {
+      $("<li>", {'id':aContent.id}).append($("<a>", {href:"${request.contextPath}/contentSearch/get?id=" + aContent.id}).append(aContent.name)).
+        appendTo(list);
+    });
+    list.show();
+  }
+
+  // renders the specified clusters of contents into the specified target HTML element.
+  function renderClusters(clusters, target) {
+    $.each(clusters, function (i, aCluster) {
+       var div = $("<fieldset>").addClass("cluster").hide().
+         append($("<legend>").html(aCluster.label)).appendTo(target);
+       renderContents(aCluster.contents, div);
+       div.show();
+    });
+  }
+
+  // searches the contents that match the the user query.
   function search() {
     var query = $("#search input[name='query']").val()
     $.ajax("${request.contextPath}/contentSearch/search?query=" + query, {
       type:'GET',
       success:function (searchResult) {
         $("#results").children().remove();
-        if (searchResult.length != 0) {
-          var results = $("<ul>").hide().appendTo("#results");
-          $.each(searchResult, function (i, aContent) {
-                $("<li>", {'id':aContent.id}).append($("<a>", {href:"${request.contextPath}/contentSearch/get?id=" + aContent.id}).append(aContent.name)
-                ).
-                    appendTo(results);
-              }
-          )
-          ;
-          results.show();
+        if (searchResult.contents.length != 0) {
+          if (searchResult.clusters.length == 0) {
+            renderContents(searchResult.contents, $("#results"));
+          } else {
+            renderClusters(searchResult.clusters, $("#results"));
+          }
         } else {
           $("<div>").addClass("message").html("No contents match").appendTo($("#results"));
         }

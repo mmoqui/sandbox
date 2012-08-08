@@ -1,6 +1,10 @@
 package semantica
 
 import org.simpleframework.xml.core.PersistenceException
+import org.apache.tika.sax.BodyContentHandler
+import org.apache.tika.parser.Parser
+import org.apache.tika.parser.AutoDetectParser
+import org.apache.tika.metadata.Metadata
 
 class ContentService {
 
@@ -29,21 +33,7 @@ class ContentService {
   def save(content, String fileName) {
     log.info "Save a content into the file ${fileName}"
     content.transferTo(new File(CONTENT_REPOSITORY + fileName)) {
-      def descriptor = ContentStorageDescriptor.findByName(it.name)
-      if (!descriptor) {
-        log.info "The content is new, references it in the system"
-        descriptor = new ContentStorageDescriptor(name: it.name, location: it.absolutePath)
-        if (!descriptor.save(flush: true)) {
-          descriptor.errors.each {
-            log.error it
-          }
-          File savedContent = new File(CONTENT_REPOSITORY + fileName)
-          if (savedContent.exists()) {
-            savedContent.delete()
-          }
-          throw new PersistenceException("${it.name} persistence failure!")
-        }
-      }
+      def descriptor = descriptorForContentIn it
       contentClassificationService.classify(it, descriptor)
     }
   }
@@ -52,18 +42,11 @@ class ContentService {
    * Finds the content that match the specified query.
    * Throws an exception if an unexpected error raises.
    * @param query a well formatted query.
-   * @return a list of content descriptors each of them describing a matching content.
+   * @return a SearchResult instance embodying the descriptors on the contents that match the query.
    */
   def findByQuery(String query) {
     log.info "Find contents matching the query: ${query}"
-    def descriptors = []
-    contentClassificationService.search(query).contents.each {
-      def contentDescriptor = ContentStorageDescriptor.get(it.id)
-      if (contentDescriptor) {
-        descriptors << contentDescriptor
-      }
-    }
-    return descriptors
+    return contentClassificationService.search(query)
   }
 
   /**
@@ -77,5 +60,61 @@ class ContentService {
     return ContentStorageDescriptor.get(id)
   }
 
+  private def descriptorForContentIn(File file) {
+    def descriptor = ContentStorageDescriptor.findByName(file.name)
+    if (!descriptor) {
+      log.info "The content is new, references it in the system"
+      descriptor = new ContentStorageDescriptor(name: file.name, location: file.absolutePath)
+    }
+    descriptor.description = extractADescriptionFrom file
+    if (!descriptor.save(flush: true)) {
+      descriptor.errors.each {
+        log.error it
+      }
+      if (file.exists()) {
+        file.delete()
+      }
+      throw new PersistenceException("${file.name} persistence failure!")
+    }
+    return descriptor
+  }
 
+  private def extractADescriptionFrom(File file) {
+    def contentIn = { aFile ->
+      StringWriter writer = new StringWriter()
+      Metadata metadata = new Metadata()
+      org.xml.sax.ContentHandler handler = new BodyContentHandler(writer)
+      Parser parser = new AutoDetectParser()
+      try {
+        parser.parse(new FileInputStream(aFile), handler, metadata)
+      } catch (Exception ex) {
+        log.error("${aFile.name} content parsing failed!", ex)
+      }
+      return writer.toString()
+    }
+
+    def sentenceEndIndex = {  text ->
+      int index = text.indexOf(".")
+      if (index <= 0) {
+        index = text.indexOf("\n")
+        if (index <= 0) {
+          index = text.length()
+        }
+      }
+      return index
+    }
+
+    def firstSentenceOf = { text ->
+      if (!text.empty) {
+        text = text.substring(0, sentenceEndIndex(text))
+        if (text.length() >= 255) {
+          text = text.substring(0, 255)
+          text = text.substring(0, text.lastIndexOf("\n"))
+        }
+      }
+      return text
+    }
+
+    return firstSentenceOf(contentIn(file))
+  }
 }
