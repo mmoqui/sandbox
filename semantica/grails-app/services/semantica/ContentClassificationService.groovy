@@ -10,16 +10,12 @@ import org.carrot2.core.Controller
 import org.carrot2.core.ControllerFactory
 import org.carrot2.core.Document
 import org.carrot2.core.ProcessingResult
-
-import javax.ws.rs.core.MediaType
-import javax.persistence.PersistenceException
-import org.carrot2.core.LanguageCode
-import org.carrot2.source.solr.SolrDocumentSourceDescriptor
-import org.carrot2.core.ProcessingComponentConfiguration
-import org.carrot2.source.solr.SolrDocumentSource
 import org.carrot2.core.attribute.CommonAttributesDescriptor
-import grails.converters.XML
-import groovy.xml.StreamingMarkupBuilder
+import semantica.carrot.SemanticaDocumentSource
+
+import javax.persistence.PersistenceException
+import javax.ws.rs.core.MediaType
+import semantica.carrot.SemanticaDocumentSourceDescriptor
 
 class ContentClassificationService {
 
@@ -66,18 +62,13 @@ class ContentClassificationService {
    * classified content.
    */
   def search(String query) {
-    Controller controller = ControllerFactory.createPooling()
-    Map<String, Object> globalSolrAttributes = [:]
-    SolrDocumentSourceDescriptor.attributeBuilder(globalSolrAttributes).
-        serviceUrlBase(grailsApplication.config.solr.url + 'select').
-        solrSummaryFieldName("description").
-        solrTitleFieldName("name").
-        solrUrlFieldName("url")
-    controller.init(new HashMap<String, Object>(),
-        new ProcessingComponentConfiguration(SolrDocumentSource.class, "solr", globalSolrAttributes))
-    Map<String, Object> processingAttributes = [:]
-    CommonAttributesDescriptor.attributeBuilder(processingAttributes).query(query)
-    ProcessingResult results = controller.process(processingAttributes, "solr", LingoClusteringAlgorithm.class.name)
+    Controller controller = ControllerFactory.createSimple()
+    controller.init()
+    Map<String, Object> attributes = [:]
+    SemanticaDocumentSourceDescriptor.attributeBuilder(attributes).
+        query(query).
+        sourceUrl(grailsApplication.config.solr.url)
+    ProcessingResult results = controller.process(attributes, SemanticaDocumentSource.class, LingoClusteringAlgorithm.class)
     return searchResultWith(results.documents, results.clusters)
   }
 
