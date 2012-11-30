@@ -1,10 +1,6 @@
 package semantica
 
 import org.simpleframework.xml.core.PersistenceException
-import org.apache.tika.sax.BodyContentHandler
-import org.apache.tika.parser.Parser
-import org.apache.tika.parser.AutoDetectParser
-import org.apache.tika.metadata.Metadata
 
 class ContentService {
 
@@ -21,7 +17,7 @@ class ContentService {
 
   /**
    * Saves the specified content (whatever it is) into a file with the specified name.
-   * The content should know how to be saved itself into a file by implementing a #transferTo method
+   * The content should know how to be saved itself into a file by implementing the #transferTo method
    * that accepts two arguments: the destination file and optionally a closure (the closure will
    * receive the actual file object into which the content is saved).
    * While saving the content into a file, the content is also automatically classified into some
@@ -34,7 +30,7 @@ class ContentService {
     log.info "Save a content into the file ${fileName}"
     content.transferTo(new File(CONTENT_REPOSITORY + fileName)) {
       def descriptor = descriptorForContentIn it
-      contentClassificationService.classify(it, descriptor)
+      contentClassificationService.classify(descriptor)
     }
   }
 
@@ -62,59 +58,32 @@ class ContentService {
 
   private def descriptorForContentIn(File file) {
     def descriptor = ContentStorageDescriptor.findByName(file.name)
+    // create a new descriptor if the content is new
     if (!descriptor) {
       log.info "The content is new, references it in the system"
       descriptor = new ContentStorageDescriptor(name: file.name, location: file.absolutePath)
+      if (!descriptor.save()) {
+        descriptor.errors.each { error ->
+          log.error error
+        }
+        if (file.exists()) {
+          file.delete()
+        }
+        throw new PersistenceException("${file.name} persistence failure!")
+      }
     }
-    descriptor.description = extractADescriptionFrom file
-    if (!descriptor.save(flush: true)) {
-      descriptor.errors.each {
-        log.error it
+
+    // create new attributes if the content has not yet such data
+    def attributes = ContentAttributes.findByContent(descriptor)
+    if (!attributes) {
+      attributes = new ContentAttributes(title: descriptor.name, content: descriptor)
+      if (!attributes.save()) {
+        attributes.errors.each { error ->
+          log.error error
+        }
       }
-      if (file.exists()) {
-        file.delete()
-      }
-      throw new PersistenceException("${file.name} persistence failure!")
     }
     return descriptor
   }
 
-  private def extractADescriptionFrom(File file) {
-    def contentIn = { aFile ->
-      StringWriter writer = new StringWriter()
-      Metadata metadata = new Metadata()
-      org.xml.sax.ContentHandler handler = new BodyContentHandler(writer)
-      Parser parser = new AutoDetectParser()
-      try {
-        parser.parse(new FileInputStream(aFile), handler, metadata)
-      } catch (Exception ex) {
-        log.error("${aFile.name} content parsing failed!", ex)
-      }
-      return writer.toString()
-    }
-
-    def sentenceEndIndex = {  text ->
-      int index = text.indexOf(".")
-      if (index <= 0) {
-        index = text.indexOf("\n")
-        if (index <= 0) {
-          index = text.length()
-        }
-      }
-      return index
-    }
-
-    def firstSentenceOf = { text ->
-      if (!text.empty) {
-        text = text.substring(0, sentenceEndIndex(text))
-        if (text.length() >= 255) {
-          text = text.substring(0, 255)
-          text = text.substring(0, text.lastIndexOf("\n"))
-        }
-      }
-      return text
-    }
-
-    return firstSentenceOf(contentIn(file))
-  }
 }

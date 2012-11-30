@@ -22,8 +22,9 @@
     <div id="semanticaLogo" role="banner"><g:link><img src="${resource(dir: 'images', file: 'semantica-logo.png')}" alt="Semantica"/></g:link>Semantica</div>
     <div id="menu" class="nav">
 		  <ul>
-          <li id="search"><g:link class="list" controller="contentSearch"> Search a content</g:link></li>
-          <li id="upload"><g:link class="create" controller="fileUpload"> Upload a file</g:link></li>
+        <li id="menu-search"><g:link class="list" controller="contentSearch"> Search a content</g:link></li>
+        <li id="menu-upload"><g:link class="create" controller="fileUpload"> Upload a file</g:link></li>
+        <li id="menu-thesaurus"><g:link class="list" controller="thesaurus"> Explore the thesaurus</g:link></li>
       </ul>
     </div>
     <div id="body">

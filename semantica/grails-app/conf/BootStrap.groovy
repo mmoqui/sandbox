@@ -1,6 +1,8 @@
-import java.util.zip.*
-import org.apache.ivy.util.FileUtil
+import grails.converters.JSON
 import org.apache.commons.io.FileUtils
+import semantica.ThesaurusTerm
+
+import java.util.zip.ZipInputStream
 
 class BootStrap {
 
@@ -48,6 +50,20 @@ class BootStrap {
         FileUtils.copyFile(delegate, dest)
         closure?.call(dest)
       }
+    }
+
+    /**
+     * Defines a specific behaviour when marshalling ThesaurusTerm objects in JSON.
+     */
+    JSON.registerObjectMarshaller(ThesaurusTerm) {
+      return [
+          id: it.id,
+          label: it.label,
+          keywords: it.keywords,
+          generalTerm: it.generalTerm?.id,
+          moreGeneral: it.moreGeneral,
+          specificTerms: it.specificTerms.collect { it.id }
+      ]
     }
   }
 

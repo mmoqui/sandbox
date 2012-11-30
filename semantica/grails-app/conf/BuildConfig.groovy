@@ -40,6 +40,8 @@ grails.project.dependency.resolution = {
     compile 'org.apache.tika:tika-parsers:1.2'
     // Carrot² dependency to cluster search results
     compile 'org.carrot2:carrot2-core:3.6.0'
+    // lucene dependency to analyse document content
+    compile 'org.apache.lucene:lucene-core:3.6.1'
   }
 
   plugins {

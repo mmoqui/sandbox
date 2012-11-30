@@ -613,3 +613,23 @@ a.skip {
 #body {
   margin: 2em;
 }
+
+#thesaurus {
+  float: left;
+  margin: 1em 1em 1em 0em;
+  padding: 1em 1em 1em 1em;
+  width: 40%;
+  display: block;
+  border: 1px solid #000000;
+  background-color: #EFEFEF;
+}
+
+#documents {
+  float: right;
+  margin: 1em 1em 1em 0em;
+  padding: 1em 1em 1em 1em;
+  width: 48%;
+  display: block;
+  border: 1px solid #000000;
+  background-color: #EFEFEF;
+}
