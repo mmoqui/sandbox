@@ -19,16 +19,6 @@
 <div id="results">
 </div>
 <g:javascript>
-  // renders the specified contents into the specified target HTML element.
-  function renderContents(contents, target) {
-    var list = $("<ul>").hide().appendTo(target);
-    $.each(contents, function (i, aContent) {
-      $("<li>", {'id':aContent.id}).append($("<a>", {href:"${request.contextPath}/contentSearch/get?id=" + aContent.id}).append(aContent.name)).
-        appendTo(list);
-    });
-    list.show();
-  }
-
   // renders the specified clusters of contents into the specified target HTML element.
   function renderClusters(clusters, target) {
     $.each(clusters, function (i, aCluster) {
@@ -47,12 +37,14 @@
       success:function (searchResult) {
         $("#results").children().remove();
         if (searchResult.contents.length != 0) {
+          $("#results").addClass("nav");
           if (searchResult.clusters.length == 0) {
             renderContents(searchResult.contents, $("#results"));
           } else {
             renderClusters(searchResult.clusters, $("#results"));
           }
         } else {
+          $("#results").removeClass("nav");
           $("<div>").addClass("message").html("No contents match").appendTo($("#results"));
         }
       },

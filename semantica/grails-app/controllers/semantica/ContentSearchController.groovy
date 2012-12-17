@@ -15,7 +15,7 @@ class ContentSearchController {
 
   /**
    * Searches the contents that match the query specified in the incoming request.
-   * @param query the query of contents.
+   * @param query the text of the query.
    */
   def search(String query) {
     def contents
@@ -28,10 +28,24 @@ class ContentSearchController {
   }
 
   /**
+   * Gets the contents classified in the specified category of the thesaurus.
+   * @param id the unique identifier of the category in the thesaurus.
+   */
+  def category(long id) {
+    def contents
+    def term = TaxonomyTerm.get(id)
+    if (term)
+      contents = contentService.findByClassification(term)
+    else
+      contents = []
+    render contents as JSON
+  }
+
+  /**
    * Gets the content identified by the specified unique identifier.
    * @param id the content unique identifier
    */
-  def get(int id) {
+  def content(long id) {
     def content = contentService.findById(id)
     if (content) {
       def file = new File(content.location)

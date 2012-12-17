@@ -19,7 +19,7 @@ import org.carrot2.core.ProcessingResult
 /**
  * Service dedicated to the indexation of documents.
  */
-class DocumentIndexation {
+class DocumentIndexationService {
 
   def grailsApplication
 
@@ -52,7 +52,7 @@ class DocumentIndexation {
             accept(MediaType.APPLICATION_JSON).
             post(String.class, multipart))
     if (response.responseHeader.status != 0) {
-      throw new RuntimeException("The indexation of ${document.attributes.content.name} has failed " +
+      throw new ApplicationException("The indexation of ${document.attributes.content.name} has failed " +
           "(status = ${response.responseHeader.status})")
     }
   }

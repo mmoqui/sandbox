@@ -3,7 +3,7 @@
 <html>
 	<head>
 		<meta name="layout" content="main">
-		<g:set var="entityName" value="${message(code: 'thesaurusTerm.label', default: 'ThesaurusTerm')}" />
+		<g:set var="entityName" value="${message(code: 'taxonomyTerm.label', default: 'ThesaurusTerm')}" />
 		<title><g:message code="default.edit.label" args="[entityName]" /></title>
 	</head>
 	<body>
@@ -19,16 +19,16 @@
 			<g:if test="${flash.message}">
 			<div class="message" role="status">${flash.message}</div>
 			</g:if>
-			<g:hasErrors bean="${thesaurusTermInstance}">
+			<g:hasErrors bean="${taxonomyTermInstance}">
 			<ul class="errors" role="alert">
-				<g:eachError bean="${thesaurusTermInstance}" var="error">
+				<g:eachError bean="${taxonomyTermInstance}" var="error">
 				<li <g:if test="${error in org.springframework.validation.FieldError}">data-field-id="${error.field}"</g:if>><g:message error="${error}"/></li>
 				</g:eachError>
 			</ul>
 			</g:hasErrors>
 			<g:form method="post" >
-				<g:hiddenField name="id" value="${thesaurusTermInstance?.id}" />
-				<g:hiddenField name="version" value="${thesaurusTermInstance?.version}" />
+				<g:hiddenField name="id" value="${taxonomyTermInstance?.id}" />
+				<g:hiddenField name="version" value="${taxonomyTermInstance?.version}" />
 				<fieldset class="form">
 					<g:render template="form"/>
 				</fieldset>

@@ -1,6 +1,6 @@
 import grails.converters.JSON
 import org.apache.commons.io.FileUtils
-import semantica.ThesaurusTerm
+import semantica.TaxonomyTerm
 
 import java.util.zip.ZipInputStream
 
@@ -55,11 +55,11 @@ class BootStrap {
     /**
      * Defines a specific behaviour when marshalling ThesaurusTerm objects in JSON.
      */
-    JSON.registerObjectMarshaller(ThesaurusTerm) {
+    JSON.registerObjectMarshaller(TaxonomyTerm) {
       return [
           id: it.id,
           label: it.label,
-          keywords: it.keywords,
+          keywords: it.subject,
           generalTerm: it.generalTerm?.id,
           moreGeneral: it.moreGeneral,
           specificTerms: it.specificTerms.collect { it.id }
@@ -68,8 +68,8 @@ class BootStrap {
   }
 
   def init = { servletContext ->
-
   }
+
   def destroy = {
   }
 }

@@ -37,4 +37,5 @@ class ContentAttributes {
    * descriptor.
    */
   static belongsTo = [content: ContentStorageDescriptor]
+
 }

@@ -1,6 +1,12 @@
 package semantica
 
 import org.simpleframework.xml.core.PersistenceException
+import org.apache.commons.io.FilenameUtils
+import org.apache.tika.metadata.TikaCoreProperties
+import org.apache.tika.language.LanguageIdentifier
+import org.apache.tika.metadata.OfficeOpenXMLCore
+import org.apache.tika.metadata.Metadata
+import org.apache.tika.Tika
 
 class ContentService {
 
@@ -13,7 +19,8 @@ class ContentService {
     }
   }
 
-  def contentClassificationService
+  def documentIndexationService
+  def documentClassificationService
 
   /**
    * Saves the specified content (whatever it is) into a file with the specified name.
@@ -29,9 +36,20 @@ class ContentService {
   def save(content, String fileName) {
     log.info "Save a content into the file ${fileName}"
     content.transferTo(new File(CONTENT_REPOSITORY + fileName)) {
-      def descriptor = descriptorForContentIn it
-      contentClassificationService.classify(descriptor)
+      def attributes = setContentAttributes it
+      documentIndexationService.index([file: it, attributes: attributes])
+      documentClassificationService.classify([file: it, attributes: attributes])
     }
+  }
+
+  /**
+   * Finds the contents that are classified with the specified term.
+   * @param term a term from the thesaurus.
+   * @return the contents classified with the specified term.
+   */
+  def findByClassification(term) {
+    log.info "Find contents classified in the category '${term.label}'"
+    return documentClassificationService.getContentsClassifiedIn(term)
   }
 
   /**
@@ -42,7 +60,8 @@ class ContentService {
    */
   def findByQuery(String query) {
     log.info "Find contents matching the query: ${query}"
-    return contentClassificationService.search(query)
+    def response = documentIndexationService.search(query)
+    return searchResultWith(response.documents, response.clusters)
   }
 
   /**
@@ -56,7 +75,7 @@ class ContentService {
     return ContentStorageDescriptor.get(id)
   }
 
-  private def descriptorForContentIn(File file) {
+  private def setContentAttributes(File file) {
     def descriptor = ContentStorageDescriptor.findByName(file.name)
     // create a new descriptor if the content is new
     if (!descriptor) {
@@ -77,13 +96,98 @@ class ContentService {
     def attributes = ContentAttributes.findByContent(descriptor)
     if (!attributes) {
       attributes = new ContentAttributes(title: descriptor.name, content: descriptor)
+    }
+    def metadata = getMetadata(file)
+    if (metadata) {
+      log.info "Set the content attributes (metadata)"
+      attributes.title = metadata.title
+      attributes.description = metadata.description
+      attributes.language = metadata.language
+      attributes.keywords = metadata.keywords
       if (!attributes.save()) {
         attributes.errors.each { error ->
           log.error error
         }
       }
     }
-    return descriptor
+    return attributes
   }
 
+  /**
+   * Parses the specified document to extract the metadata on the content.
+   * @param document the document as a file.
+   * @return a map with the document metadata: title, description, subject, and language.
+   */
+  private def getMetadata(File document) {
+    final short LinesMaxNumber = 5
+    def metadata = [:]
+    Reader content = null
+    try {
+      Tika parser = new Tika()
+      Metadata extractedMetadata = new Metadata()
+      content = parser.parse(new FileInputStream(document), extractedMetadata)
+      metadata.title = extractedMetadata.get(TikaCoreProperties.TITLE)
+      metadata.description = extractedMetadata.get(OfficeOpenXMLCore.SUBJECT)
+      if (!metadata.description)
+        metadata.description = extractedMetadata.get(TikaCoreProperties.DESCRIPTION)
+      metadata.language = extractedMetadata.get(TikaCoreProperties.LANGUAGE)
+      metadata.keywords = extractedMetadata.get(TikaCoreProperties.KEYWORDS)
+
+      if (!metadata.title)
+        metadata.title = FilenameUtils.getBaseName(document.name).replaceAll("[,-_\\.]|(%20)", " ")
+
+      if (!metadata.description || !metadata.language) {
+        String snippets = ""
+        BufferedReader buffer = new BufferedReader(content)
+        String contentLine
+        for (short lineCount = 0; lineCount < LinesMaxNumber && (contentLine = buffer.readLine())
+            != null; lineCount++) {
+          if (contentLine)
+            snippets += contentLine + "\n"
+          else
+            lineCount--
+        }
+        if (!metadata.description)
+          metadata.description = snippets
+        if (!metadata.language) {
+          LanguageIdentifier identifier = new LanguageIdentifier(snippets)
+          metadata.language = identifier.language
+        }
+      }
+    } catch (Exception ex) {
+      log.error("${document.name} content parsing failed!", ex)
+      metadata.title = FilenameUtils.getBaseName(document.name).replaceAll("[,-_\\.]|(%20)", " ")
+    } finally {
+      try {
+        content?.close()
+      } catch (IOException ex) {
+        log.warn(ex.getMessage())
+      }
+    }
+    return metadata
+  }
+
+  private static def searchResultWith(contents, clusters) {
+    def searchResultContents = contents.collect { doc ->
+      ContentStorageDescriptor descriptor = ContentStorageDescriptor.findByName(doc.title)
+      if (descriptor == null)
+        throw new PersistenceException("Descriptor of content ${doc.title} not found!")
+      descriptor
+    }
+    def searchResultClusters
+    if (!clusters.empty && contents.size() >= 10) {
+      searchResultClusters = clusters.collect {
+        new SearchResultCluster(label: it.label, contents:
+            it.allDocuments.collect { doc ->
+              ContentStorageDescriptor descriptor = ContentStorageDescriptor.findByName(doc.title)
+              if (descriptor == null)
+                throw new PersistenceException("Descriptor of content ${doc.title} not found!")
+              descriptor
+            })
+      }
+    } else {
+      searchResultClusters = []
+    }
+    return new SearchResult(contents: searchResultContents, clusters: searchResultClusters)
+  }
 }

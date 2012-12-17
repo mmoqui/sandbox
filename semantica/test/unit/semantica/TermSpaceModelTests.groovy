@@ -3,13 +3,12 @@ package semantica
 
 
 import grails.test.mixin.*
-import org.junit.*
 
 /**
  * See the API for {@link grails.test.mixin.domain.DomainClassUnitTestMixin} for usage instructions
  */
-@TestFor(Thesaurus)
-class ThesaurusTests {
+@TestFor(TermSpaceModel)
+class TermSpaceModelTests {
 
   void testSomething() {
     fail "Implement me"

@@ -1,13 +1,10 @@
 package semantica
 
-
-
-import org.junit.*
 import grails.test.mixin.*
 
-@TestFor(ThesaurusTermController)
+@TestFor(TaxonomyTermController)
 @Mock(ThesaurusTerm)
-class ThesaurusTermControllerTests {
+class TaxonomyTermControllerTests {
 
     def populateValidParams(params) {
         assert params != null
@@ -57,7 +54,7 @@ class ThesaurusTermControllerTests {
         assert response.redirectedUrl == '/thesaurusTerm/list'
 
         populateValidParams(params)
-        def thesaurusTerm = new ThesaurusTerm(params)
+        def thesaurusTerm = new TaxonomyTerm(params)
 
         assert thesaurusTerm.save() != null
 
@@ -95,7 +92,7 @@ class ThesaurusTermControllerTests {
         response.reset()
 
         populateValidParams(params)
-        def thesaurusTerm = new ThesaurusTerm(params)
+        def thesaurusTerm = new TaxonomyTerm(params)
 
         assert thesaurusTerm.save() != null
 
@@ -139,10 +136,10 @@ class ThesaurusTermControllerTests {
         response.reset()
 
         populateValidParams(params)
-        def thesaurusTerm = new ThesaurusTerm(params)
+        def thesaurusTerm = new TaxonomyTerm(params)
 
         assert thesaurusTerm.save() != null
-        assert ThesaurusTerm.count() == 1
+        assert TaxonomyTerm.count() == 1
 
         params.id = thesaurusTerm.id
 

@@ -11,7 +11,7 @@ h1, h2, h3, h4, h5, h6 {
 /* BASE LAYOUT */
 
 html {
-  background-color: #ddd;
+  background-color: #dddddd;
   background-image: -moz-linear-gradient(center top, #aaa, #ddd);
   background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #aaa), color-stop(1, #ddd));
   background-image: linear-gradient(top, #aaa, #ddd);
@@ -614,22 +614,28 @@ a.skip {
   margin: 2em;
 }
 
-#thesaurus {
+#classification {
   float: left;
   margin: 1em 1em 1em 0em;
   padding: 1em 1em 1em 1em;
   width: 40%;
   display: block;
-  border: 1px solid #000000;
-  background-color: #EFEFEF;
+  background-color: #efefef;
+  padding: 0.5em 0.75em;
+  -moz-box-shadow: 0 0 3px 1px #aaaaaa;
+  -webkit-box-shadow: 0 0 3px 1px #aaaaaa;
+  box-shadow: 0 0 3px 1px #aaaaaa;
+  zoom: 1;
 }
 
 #documents {
   float: right;
-  margin: 1em 1em 1em 0em;
+  margin: 1em 0em 1em 0em;
   padding: 1em 1em 1em 1em;
-  width: 48%;
-  display: block;
-  border: 1px solid #000000;
-  background-color: #EFEFEF;
+  width: 50%;
+}
+
+.nav legend {
+  width: 100%;
+  background-color: #abbf78;
 }

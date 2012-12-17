@@ -24,7 +24,7 @@
 		  <ul>
         <li id="menu-search"><g:link class="list" controller="contentSearch"> Search a content</g:link></li>
         <li id="menu-upload"><g:link class="create" controller="fileUpload"> Upload a file</g:link></li>
-        <li id="menu-thesaurus"><g:link class="list" controller="thesaurus"> Explore the thesaurus</g:link></li>
+        <li id="menu-thesaurus"><g:link class="list" controller="planOfClassification"> Explore the classification</g:link></li>
       </ul>
     </div>
     <div id="body">

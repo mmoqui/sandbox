@@ -33,6 +33,7 @@ class FileUploadController {
           c.call(dest)
         }]
       }
+
       contentService.save(content, fileName)
       flash.message = "File \'${fileName}\' uploaded!"
     }

@@ -2,20 +2,20 @@
 <html>
 <head>
   <meta name="layout" content="main"/>
-  <title>Thesaurus</title>
+  <title>Plan of Classification</title>
   <r:require module="jsTree"/>
 </head>
 
 <body>
-<h1>Explore a thesaurus</h1>
+<h1>Explore the plan of classification</h1>
 
 <div class="nav">
   <div id="upload">
-    <g:uploadForm controller="thesaurus" action="upload">
-      <label for="fileToUpload">Upload a thesaurus from a comma-separated CSV file:</label>
+    <g:uploadForm controller="planOfClassification" action="upload">
+      <label for="fileToUpload">Upload a taxonomy into the plan from a comma-separated CSV file:</label>
       <input type="file" name="fileToUpload" id="fileToUpload"/>
       <input type="hidden" name="fileName"/>
-      <label for="language">Language of the thesaurus:</label>
+      <label for="language">Language of the taxonomy:</label>
       <g:select name="language" from="${semantica.SupportedLanguage.languages()}" optionKey="code"
                 optionValue="label"/>
       <input type="submit"/>
@@ -25,22 +25,22 @@
     <div class="error">${flash.error}</div>
   </div>
 
-  <p><g:link class="create" controller="thesaurusTerm">Edit the thesaurus</g:link></p>
+  <p><g:link class="create" controller="taxonomyTerm">Edit the plan of classification</g:link></p>
 </div>
 
-<div id="thesaurus">
+<div id="classification" class="empty">
 </div>
 
-<div id="documents">
+<div id="documents" class="nav">
   <p>No documents</p>
 </div>
 
 <g:javascript>
-  function fetchThesaurusTermsById(termIds) {
+  function fetchTaxonomyTermsById(termIds) {
     var terms = [];
     for (var i in termIds) {
       $.ajax({
-            url:"/semantica/thesaurus/terms/" + termIds[i],
+            url:"/semantica/planOfClassification/terms/" + termIds[i],
             dataType:'json',
             async:false,
             success:function (aTerm) {
@@ -57,10 +57,10 @@
 
   function fetchChildTerms(parent) {
     var terms;
-    if (parent.vocabulary) {
-      terms = fetchThesaurusTermsById(parent.vocabulary)
+    if (parent.taxonomies) {
+      terms = fetchTaxonomyTermsById(parent.taxonomies)
     } else {
-      terms = fetchThesaurusTermsById(parent.specificTerms)
+      terms = fetchTaxonomyTermsById(parent.specificTerms)
     }
     return terms;
   }
@@ -82,10 +82,10 @@
   }
 
   $("#upload input[name='fileToUpload']").change(function () {
-    $("#upload input[name='fileName']").val(this.files[0].name);
+    this.val(this.files[0].name);
   });
 
-  $("#thesaurus").jstree({
+  $("#classification").jstree({
     "plugins":["themes", "json_data", "ui"],
     "json_data":{
       "ajax":{
@@ -94,11 +94,11 @@
           var nodeId = "";
           var url = ""
           if (node == -1) {
-            url = "/semantica/thesaurus/vocabulary";
+            url = "/semantica/planOfClassification/taxonomies";
           }
           else {
             nodeId = node.attr('id');
-            url = "/semantica/thesaurus/terms/" + nodeId;
+            url = "/semantica/planOfClassification/terms/" + nodeId;
           }
 
           return url;
@@ -115,16 +115,34 @@
             terms = fetchChildTerms(data);
           }
           if (terms.length == 0) {
-            if ($("#thesaurus").children().length == 0) {
-              $("<p>").text("No thesaurus").appendTo($("#thesaurus"));
-            }
+            if ($("#classification").hasClass("empty"))
+              $("#classification").append($("<p>").html("No taxonomies"));
             return [];
+          } else if ($("#classification").hasClass("empty")) {
+            $("#classification").removeClass("empty");
           }
           return asJsTree(terms);
         }
       }
     }
-  });
+  }).bind("select_node.jstree", function (event, data) {
+        var termId = $(data.rslt.obj).attr("id");
+        $.ajax("/semantica/contentSearch/category/" + termId, {
+          type:"GET",
+          dataType:"json",
+          success:function (contents) {
+            $("#documents").children().remove();
+            if (contents.length > 0) {
+              renderContents(contents, ${"documents"});
+            } else {
+              $("<p>").text("No documents").appendTo($("#documents"));
+            }
+          },
+          error:function (jqXHR, textStatus, errorThrown) {
+            alert(errorThrown);
+          }
+        });
+      });
 </g:javascript>
 </body>
 </html>
