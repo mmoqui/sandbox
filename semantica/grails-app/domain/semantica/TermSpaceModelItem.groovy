@@ -10,7 +10,7 @@ package semantica
 class TermSpaceModelItem {
 
   static constraints = {
-    term nullable: false, blank: false
+    term nullable: false, blank: false, unique: true
     taxonomyTerms minSize: 1
   }
 
@@ -29,4 +29,19 @@ class TermSpaceModelItem {
   static hasMany = [taxonomyTerms: TaxonomyTerm]
 
   static belongsTo = [TermSpaceModel]
+
+  @Override
+  boolean equals(o) {
+    if (this.is(o)) return true
+    if (o.hasProperty("term"))
+      this.term == o.term
+    if (o.respondsTo("term"))
+      return this.term == o.term()
+    return false
+  }
+
+  @Override
+  int hashCode() {
+    return term.hashCode()
+  }
 }

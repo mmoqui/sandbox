@@ -1,6 +1,7 @@
 import grails.converters.JSON
 import org.apache.commons.io.FileUtils
 import semantica.TaxonomyTerm
+import semantica.TermSpaceModel
 
 import java.util.zip.ZipInputStream
 
@@ -68,6 +69,8 @@ class BootStrap {
   }
 
   def init = { servletContext ->
+    TermSpaceModel model = TermSpaceModel.get()
+    model.save(flush: true)
   }
 
   def destroy = {

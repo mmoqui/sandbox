@@ -11,6 +11,9 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute
 import org.apache.lucene.analysis.TokenStream
 import org.apache.lucene.util.Version
+import org.tartarus.snowball.SnowballProgram
+import org.tartarus.snowball.ext.FrenchStemmer
+import org.tartarus.snowball.ext.PortugueseStemmer
 
 /**
  * The text analyzer parses the content from a reader to extract from it stemmed words with for each
@@ -23,7 +26,7 @@ class TextAnalyzer {
    */
   private static final LUCENE_VERSION = Version.LUCENE_36
 
-  private def Analyzer analyzer
+  private Analyzer analyzer
 
   /**
    * Constructs a new text analyzer for the specified language.
@@ -54,20 +57,21 @@ class TextAnalyzer {
 
   private static Analyzer newAnalyzerFor(iso639LanguageCode) {
     Analyzer analyzer
-    if (iso639LanguageCode == 'fr')
+    if (iso639LanguageCode == 'fr') {
       analyzer = new FrenchAnalyzer(LUCENE_VERSION)
-    else if (iso639LanguageCode == 'en')
+    } else if (iso639LanguageCode == 'en') {
       analyzer = new EnglishAnalyzer(LUCENE_VERSION)
-    else if (iso639LanguageCode == 'de')
+    } else if (iso639LanguageCode == 'de') {
       analyzer = new GermanAnalyzer(LUCENE_VERSION)
-    else if (iso639LanguageCode == 'es')
+    } else if (iso639LanguageCode == 'es') {
       analyzer = new SpanishAnalyzer(LUCENE_VERSION)
-    else if (iso639LanguageCode == 'pt')
+    } else if (iso639LanguageCode == 'pt') {
       analyzer = new PortugueseAnalyzer(LUCENE_VERSION)
-    else if (iso639LanguageCode == 'it')
+    } else if (iso639LanguageCode == 'it') {
       analyzer = new ItalianAnalyzer(LUCENE_VERSION)
-    else
+    } else {
       analyzer = new StandardAnalyzer(LUCENE_VERSION)
+    }
     return analyzer
   }
 }

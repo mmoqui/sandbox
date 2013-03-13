@@ -32,15 +32,11 @@ class DocumentClassificationService {
    * @param document the document to classify, defined as indicated above.
    */
   def classify(document) {
-    def vector = extractFeatures(document)
-    vector.each { println "Term ${it.term} -> ${it.weight}" }
-    TermSpaceModel termSpace = TermSpaceModel.get()
-    def selectedClassLabels = lookupClassLabelsFor(vector, termSpace)
-    /*plan.taxonomies.each { term ->
-      selectedClassLabels.addAll(lookupForMatching(vector, term))
-    }*/
-    createClassification(document, selectedClassLabels)
-    //enrichTermSpaceModel(termSpace, selectedClassLabels, vector)
+    List<ClassificationFeature> features = extractFeatures(document)
+    def selectedClassLabels = lookupClassLabels(features)
+    List<ContentCategory> categories = createClassification(document, selectedClassLabels)
+    enrichTermSpaceModel(selectedClassLabels, features)
+    return categories
   }
 
   def getContentsClassifiedIn(term) {
@@ -59,7 +55,8 @@ class DocumentClassificationService {
    * the content. The terms in the vector are ordered by their frequency in the document from the
    * higher frequent term to the lower one.
    */
-  private def extractFeatures(document) {
+  private extractFeatures(document) {
+    log.info("Extract terms from document ${document.file.name}...")
     Reader reader = null
     try {
       TextAnalyzer analyzer = new TextAnalyzer(document.attributes.language)
@@ -73,7 +70,9 @@ class DocumentClassificationService {
           termCounter.each { it.value += weightBonus })
 
       return termCounter.collect {
-        new ClassificationFeature(term: it.key, weight: Math.log1p(it.value))
+        double weight = Math.log1p(it.value)
+        log.debug(" -> Term ${it.key} found with weight ${weight}")
+        new ClassificationFeature(term: it.key, weight: weight)
       }.sort { -it.weight }
     } catch (Exception ex) {
       log.error("${document.name} content parsing failed!", ex)
@@ -87,34 +86,16 @@ class DocumentClassificationService {
     return []
   }
 
-  /*private static def lookupForMatching(vector, parentTerm) {
-    def classLabel = defineAClassificationLabelFor parentTerm
-    println("Features of term ${parentTerm.label} -> ${classLabel.features().collect { it.term } }")
-    classLabel.features().each {
-      def i = vector.indexOf(it)
-      classLabel.weight += (i >= 0 ? vector[i].weight : 0)
-    }
-    if (classLabel.weight > 0) {
-      def matchedLabels = parentTerm.specificTerms.collect { lookupForMatching(vector, it) }
-      matchedLabels = matchedLabels.flatten()
-      if (!matchedLabels.isEmpty()) {
-        def firstMorePertinentCategory = matchedLabels.max { it.weight }
-        return matchedLabels.findAll { it.weight == firstMorePertinentCategory.weight }
-      }
-
-      return [classLabel]
-    }
-    return []
-  }*/
-
-  private static def lookupClassLabelsFor(vector, termSpace) {
-    println("Lookup for categories...")
+  private lookupClassLabels(vector) {
+    log.info("Lookup for categories...")
     def classLabelsById = [:]
-    termSpace.terms.each { term ->
-      ClassificationFeature feature = vector.find { it.term == term.term }
-      if (feature) {
-        term.taxonomyTerms.each {
-          println("-> Taxonomy term ${it.label} matching!")
+    // find the class labels matching the features
+    vector.each { ClassificationFeature feature ->
+      TermSpaceModelItem item = TermSpaceModelItem.findByTerm(feature.term)
+      if (item) {
+        // weight each taxonomy term
+        item.taxonomyTerms.each {
+          // weight it with the feature weight
           def classLabel = classLabelsById[it.id]
           if (!classLabel)
             classLabelsById[it.id] = [term: it, weight: feature.weight]
@@ -123,23 +104,28 @@ class DocumentClassificationService {
         }
       }
     }
+    // now, for features matching exactly taxonomy terms, they are weighty accordingly
     def classLabels = classLabelsById.values()
-    classLabels.each { println("Category ${it.term.label} detected with weight ${it.weight}") }
+    classLabels.each { classLabel ->
+      log.debug(" -> Category ${classLabel.term.label} detected with weight ${classLabel.weight}")
+      def stemmedLabelTokens = stemmedTaxonomyLabel(classLabel.term).collect { new ClassificationFeature(term: it.key, weight: it.value) }
+      int pos = vector.indexOf(stemmedLabelTokens[0])
+      boolean match = pos > -1
+      for (int i = 1; i < stemmedLabelTokens.size(); i++) {
+        if (pos+i > vector.size() || (vector[pos + i] != stemmedLabelTokens[i])) {
+          match = false
+          break;
+        }
+      }
+      if (match)
+        classLabel.weight += 100
+    }
+    // fetch the more weighted class labels
     def firstMorePertinentClassLabel = classLabels.max { it.weight }
     return classLabels.findAll { it.weight == firstMorePertinentClassLabel.weight }
   }
 
-  /*private static def defineAClassificationLabelFor(term) {
-    return [term: term,
-        weight: 0,
-        features: {
-          TextAnalyzer analyzer = new TextAnalyzer(term.language)
-          def terms = analyzer.analyze(new StringReader(term.subject), [:])
-          return terms.collect { new ClassificationFeature(term: it.key, weight: 1) }
-        }]
-  }*/
-
-  private def contentCategoryMatching(classLabel) {
+  private contentCategoryMatching(classLabel) {
     ContentCategory category = ContentCategory.findByTerm(classLabel.term)
     if (!category) {
       category = new ContentCategory(term: classLabel.term)
@@ -147,27 +133,21 @@ class DocumentClassificationService {
     return category
   }
 
-  private def enrichTermSpaceModel(termSpace, classLabels, vector) {
+  private enrichTermSpaceModel(classLabels, features) {
+    TermSpaceModel termSpace = TermSpaceModel.get()
     if (!classLabels.empty) {
-      vector.each { feature ->
+      features.each { ClassificationFeature feature ->
         if (feature.weight > weightThreshold) {
-          def term = termSpace.terms.find { it.term == feature.term }
-          if (term) {
-            classLabels.each {
-              if (!term.taxonomyTerms.contains(it.term)) {
-                println("Link the term ${term.term} in the Term Space Model with the taxonomy term ${it.term.label}")
-                term.addToTaxonomyTerms(it.term)
-              }
-            }
-          } else {
-            println("Enrich the Term Space Model with the term ${feature.term}")
-            term = new TermSpaceModelItem(term: feature.term)
-            classLabels.each { term.addToTaxonomyTerms(it.term) }
-            termSpace.addToTerms(term)
+          TermSpaceModelItem item = TermSpaceModelItem.findByTerm(feature.term)
+          if (!item) {
+            log.info("Enrich the Term Space Model with the term ${feature.term}")
+            item = new TermSpaceModelItem(term: feature.term)
+            classLabels.each { item.addToTaxonomyTerms(it.term) }
+            termSpace.addToTerms(item)
           }
         }
       }
-      if (!termSpace.save()) {
+      if (!termSpace.save(flush: true)) {
         termSpace.errors.each { error ->
           log.error error
         }
@@ -176,8 +156,8 @@ class DocumentClassificationService {
   }
 
   private createClassification(document, classLabels) {
-    classLabels.each {
-      println("Class selected: ${it.term.label}")
+    return classLabels.collect {
+      log.info("Category selected: ${it.term.label}")
       def category = contentCategoryMatching(it)
       category.addToContents(document.attributes)
       if (!category.save()) {
@@ -185,6 +165,12 @@ class DocumentClassificationService {
           log.error error
         }
       }
+      category
     }
+  }
+
+  private stemmedTaxonomyLabel(TaxonomyTerm term) {
+    TextAnalyzer analyzer = new TextAnalyzer(term.language)
+    return analyzer.analyze(new StringReader(term.label), [:])
   }
 }

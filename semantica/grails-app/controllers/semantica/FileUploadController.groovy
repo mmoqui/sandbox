@@ -34,8 +34,10 @@ class FileUploadController {
         }]
       }
 
-      contentService.save(content, fileName)
-      flash.message = "File \'${fileName}\' uploaded!"
+      def categories = contentService.save(content, fileName)
+      flash.message = "File \'${fileName}\' uploaded"
+      if (!categories.empty)
+        flash.message += " and categorized in ${(categories.collect { it.term.label }).join(',')}"
     }
     redirect action: 'index'
   }

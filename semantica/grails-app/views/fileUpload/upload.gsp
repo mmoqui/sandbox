@@ -15,7 +15,6 @@
     <input type="submit"/>
   </g:uploadForm>
   <div class="message">${flash.message}</div>
-</div>
 <g:javascript>
   $("#upload input[name='fileToUpload']").change(function () {
     $("#upload input[name='fileName']").val(this.files[0].name);

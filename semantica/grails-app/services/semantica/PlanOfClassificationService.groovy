@@ -11,20 +11,21 @@ class PlanOfClassificationService {
   def loadFrom(File csvFile, String language) {
     PlanOfClassification planOfClassification = PlanOfClassification.get()
     TermSpaceModel termSpace = TermSpaceModel.get()
-    def stackOfCurrentTerms = []
+    List<TaxonomyTerm> stackOfCurrentTerms = []
     csvFile.eachCsvLine { tokens ->
       int i = -1
       while(! tokens[++i] && i < tokens.length) { continue }
       if (i < tokens.length) {
-        stackOfCurrentTerms[i] = new TaxonomyTerm(label: tokens[i],
-            subject: keywordsFromToken(tokens[i+1]), language: language)
+        stackOfCurrentTerms[i] = new TaxonomyTerm(
+            label: tokens[i],
+            subject: keywordsFromToken(tokens[i+1]),
+            language: language)
+        stackOfCurrentTerms[i].save()
         termSpaceModelItemFrom(stackOfCurrentTerms[i]).each { termSpace.addToTerms(it) }
         if (i > 0) {
           stackOfCurrentTerms[i].generalTerm = stackOfCurrentTerms[i - 1]
           stackOfCurrentTerms[i - 1].addToSpecificTerms(stackOfCurrentTerms[i])
-          //stackOfCurrentTerms[i - 1].save()
         } else {
-          //stackOfCurrentTerms[0].save()
           planOfClassification.addToTaxonomies(stackOfCurrentTerms[0])
         }
       }
@@ -50,8 +51,7 @@ class PlanOfClassificationService {
   private static def termSpaceModelItemFrom(TaxonomyTerm taxonomyTerm) {
     TextAnalyzer analyzer = new TextAnalyzer(taxonomyTerm.language)
     def terms = analyzer.analyze(
-        new StringReader(taxonomyTerm.subject),
-        analyzer.analyze(new StringReader(taxonomyTerm.label), [:]))
+        new StringReader(taxonomyTerm.subject), analyzer.analyze(new StringReader(taxonomyTerm.label), [:]))
     return terms.collect {
       TermSpaceModelItem item = TermSpaceModelItem.findByTerm(it.key)
       if (!item) {

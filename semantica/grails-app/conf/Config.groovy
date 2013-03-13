@@ -64,6 +64,8 @@ environments {
   development {
     grails.logging.jul.usebridge = true
     log4j = {
+      debug "grails.app.controllers"
+      debug "grails.app.services"
       appenders {
         console name:'stdout', layout:pattern(conversionPattern: '%c{2} %m%n')
       }

@@ -20,14 +20,16 @@ class ClassificationFeature {
 
   @Override
   boolean equals(Object o) {
-    if (!o instanceof ClassificationFeature)
-      return false
-    ClassificationFeature feature = o as ClassificationFeature
-    return feature.term == this.term
+    if (this.is(o)) return true
+    if (o.hasProperty("term"))
+        this.term == o.term
+    if (o.respondsTo("term"))
+        return this.term == o.term()
+    return false
   }
 
   @Override
   int hashCode() {
-    return super.hashCode()
+    return term.hashCode()
   }
 }
