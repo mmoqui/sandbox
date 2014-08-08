@@ -6,6 +6,8 @@ import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.CDI;
 import java.lang.reflect.Type;
 import java.util.Iterator;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author mmoquillon
@@ -20,11 +22,10 @@ public final class ServiceProvider {
 
   public static <T> T getService(Class<T> type) {
     BeanManager beanManager = CDI.current().getBeanManager();
-    Iterator<Bean< ? >> iterator = beanManager.getBeans(type).iterator();
-    if (!iterator.hasNext()) {
-      throw new IllegalStateException("Cannot find an instance of type " + type.getName());
-    }
-    Bean<T> bean = (Bean<T>) iterator.next();
+    Bean<T> bean = (Bean<T>) beanManager.getBeans(type).stream()
+        .findFirst()
+        .orElseThrow(
+          () -> new IllegalStateException("Cannot find an instance of type " + type.getName()));
     CreationalContext<T> ctx = beanManager.createCreationalContext(bean);
     T service = (T) beanManager.getReference(bean, type, ctx);
 
@@ -33,16 +34,25 @@ public final class ServiceProvider {
 
   public static <T> T getService(String name) {
     BeanManager beanManager = CDI.current().getBeanManager();
-    Iterator<Bean< ? >> iterator = beanManager.getBeans(name).iterator();
-    if (!iterator.hasNext()) {
-      throw new IllegalStateException("Cannot find an instance named " + name);
-    }
-    Bean<T> bean = (Bean<T>) iterator.next();
+    Bean<T> bean = (Bean<T>) beanManager.getBeans(name).stream()
+        .findFirst()
+        .orElseThrow(() -> new IllegalStateException("Cannot find an instance of name " + name));
     CreationalContext<T> ctx = beanManager.createCreationalContext(bean);
-    Type type = (Type) bean.getTypes().iterator().next();
+    Type type = bean.getTypes().stream().findFirst().get();
     T service = (T) beanManager.getReference(bean, type, ctx);
 
     return service;
+  }
+
+  public static <T> Set<T> getAllServices(Class<T> type) {
+    BeanManager beanManager = CDI.current().getBeanManager();
+    Set<T> services = beanManager.getBeans(type).stream()
+        .map(bean -> {
+          CreationalContext ctx = beanManager.createCreationalContext(bean);
+          return (T) beanManager.getReference(bean, type, ctx);
+    })
+        .collect(Collectors.toSet());
+    return services;
   }
 
 }

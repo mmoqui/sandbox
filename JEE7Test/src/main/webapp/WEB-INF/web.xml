@@ -4,6 +4,9 @@
 
 <web-app>
   <display-name>A JEE 7 web application test</display-name>
+  <listener>
+    <listener-class>org.silverpeas.sandbox.jee7test.web.ApplicationInitializer</listener-class>
+  </listener>
   <servlet>
     <servlet-name>UserServlet</servlet-name>
     <servlet-class>org.silverpeas.sandbox.jee7test.web.mvc.GenericRequestRouter</servlet-class>

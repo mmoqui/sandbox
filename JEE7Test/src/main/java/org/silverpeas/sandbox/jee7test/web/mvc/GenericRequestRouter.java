@@ -75,9 +75,9 @@ public class GenericRequestRouter extends HttpServlet {
   }
 
   private String invoke(HttpServletRequest request, String type) {
-    String path = request.getRequestURI();
-    int index = path.indexOf(request.getServletPath()) + request.getServletPath().length();
-    path = path.substring(index);
+    String requestURI = request.getRequestURI();
+    int index = requestURI.indexOf(request.getServletPath()) + request.getServletPath().length();
+    final String path = requestURI.substring(index);
     Parameters result = null;
     String nextView = "/error.jsp";
     for (Method method : invokables.get(type)) {

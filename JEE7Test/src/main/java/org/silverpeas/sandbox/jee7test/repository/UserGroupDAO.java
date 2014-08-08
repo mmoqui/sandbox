@@ -42,7 +42,7 @@ public class UserGroupDAO {
     try (Connection connection = dataSource.getConnection();
          PreparedStatement statement = connection.prepareStatement(ALL);
          ResultSet rs = statement.executeQuery()) {
-        while(rs.next()) {
+      while(rs.next()) {
           long id = rs.getLong("id");
           String name = rs.getString("name");
           groups.add(new UserGroup(String.valueOf(id), name));
