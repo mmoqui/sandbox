@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
  * @author mmoquillon
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD})
+@Target({ElementType.TYPE})
 @Inherited
-public @interface Initialization {
+public @interface Initializer {
 }
