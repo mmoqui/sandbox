@@ -22,4 +22,8 @@ public class Parameters {
   public Set<String> getParameterNames() {
     return p.keySet();
   }
+
+  public boolean contains(String parameterName) {
+    return p.containsKey(parameterName);
+  }
 }

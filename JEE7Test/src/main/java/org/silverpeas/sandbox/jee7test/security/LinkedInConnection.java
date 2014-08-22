@@ -2,15 +2,14 @@ package org.silverpeas.sandbox.jee7test.security;
 
 import org.springframework.social.connect.UserProfile;
 import org.springframework.social.linkedin.connect.LinkedInConnectionFactory;
-import org.springframework.social.oauth1.AuthorizedRequestToken;
-import org.springframework.social.oauth1.OAuth1Operations;
 import org.springframework.social.oauth1.OAuthToken;
-import org.springframework.social.oauth2.AccessGrant;
 import org.springframework.social.oauth2.OAuth2Operations;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Named;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author mmoquillon
@@ -18,6 +17,7 @@ import java.util.ResourceBundle;
 @Named("linkedInConnection")
 public class LinkedInConnection implements SocialNetworkConnection {
 
+  private static Logger logger = Logger.getLogger(LinkedInConnection.class.getSimpleName());
   private String consumerKey;
   private String secretKey;
   private LinkedInConnectionFactory connectionFactory;
@@ -32,8 +32,8 @@ public class LinkedInConnection implements SocialNetworkConnection {
 
   @Override
   public OAuthToken connect(final OAuthCredentials credentials) {
-    System.out.println("CONNECTION WITH LINKEDIN...");
-    OAuth2Operations oauthOperations = connectionFactory. getOAuthOperations();
+    logger.log(Level.INFO, "CONNECTION WITH LINKEDIN...");
+    OAuth2Operations oauthOperations = connectionFactory.getOAuthOperations();
     return new OAuthToken(consumerKey, secretKey);
   }
 

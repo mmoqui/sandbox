@@ -1,7 +1,10 @@
 package org.silverpeas.sandbox.jee7test.messaging;
 
+import org.silverpeas.sandbox.jee7test.service.MessageBucket;
+
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
+import javax.inject.Inject;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
@@ -20,13 +23,16 @@ public class EventNotificationReporter implements MessageListener {
 
   private Logger logger = Logger.getLogger(getClass().getSimpleName());
 
+  @Inject
+  private MessageBucket messageBucket;
+
   @Override
   public void onMessage(final Message message) {
     TextMessage notification;
     try {
       if (message instanceof TextMessage) {
         notification = (TextMessage) message;
-        logger.log(Level.INFO, notification.getText());
+        messageBucket.pour(notification.getText());
       } else {
         logger.log(Level.WARNING, "Invalid event notification received");
       }

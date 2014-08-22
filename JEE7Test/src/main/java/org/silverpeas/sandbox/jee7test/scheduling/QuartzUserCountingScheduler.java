@@ -13,7 +13,10 @@ import org.quartz.impl.StdSchedulerFactory;
 import org.silverpeas.sandbox.jee7test.init.annotation.Initialization;
 import org.silverpeas.sandbox.jee7test.init.annotation.Initializer;
 import org.silverpeas.sandbox.jee7test.model.User;
+import org.silverpeas.sandbox.jee7test.service.MessageBucket;
+import org.silverpeas.sandbox.jee7test.util.ServiceProvider;
 
+import javax.inject.Inject;
 import java.time.Instant;
 import java.util.Date;
 
@@ -55,7 +58,11 @@ public class QuartzUserCountingScheduler implements Job {
   @Override
   public void execute(final JobExecutionContext context) throws JobExecutionException {
     int count = User.getAll().size();
-    System.out.println("[" + context.getJobDetail().getKey().getName() + "] THERE IS "+ count +
+    getMessageBucket().pour("[" + context.getJobDetail().getKey().getName() + "] THERE IS " + count +
         " USERS YET");
+  }
+
+  private MessageBucket getMessageBucket() {
+    return ServiceProvider.getService(MessageBucket.class);
   }
 }

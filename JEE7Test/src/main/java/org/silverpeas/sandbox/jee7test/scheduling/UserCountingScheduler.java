@@ -1,6 +1,7 @@
 package org.silverpeas.sandbox.jee7test.scheduling;
 
 import org.silverpeas.sandbox.jee7test.model.User;
+import org.silverpeas.sandbox.jee7test.service.MessageBucket;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -11,6 +12,7 @@ import javax.ejb.Timeout;
 import javax.ejb.Timer;
 import javax.ejb.TimerConfig;
 import javax.ejb.TimerService;
+import javax.inject.Inject;
 
 /**
  * @author mmoquillon
@@ -21,6 +23,9 @@ public class UserCountingScheduler {
 
   @Resource
   private TimerService timerService;
+
+  @Inject
+  private MessageBucket messageBucket;
 
   @PostConstruct
   public void init() {
@@ -36,7 +41,7 @@ public class UserCountingScheduler {
   @Timeout
   public void schedule(Timer timer) {
     int count = User.getAll().size();
-    System.out.println("[" + timer.getInfo().toString() + "] THERE IS " + count + " USERS YET");
+    messageBucket.pour("[" + timer.getInfo().toString() + "] THERE IS " + count + " USERS YET");
   }
 
 }

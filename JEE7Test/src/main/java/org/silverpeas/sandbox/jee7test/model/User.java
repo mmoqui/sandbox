@@ -4,12 +4,14 @@ import org.silverpeas.sandbox.jee7test.messaging.EventNotifier;
 import org.silverpeas.sandbox.jee7test.repository.UserRepository;
 import org.silverpeas.sandbox.jee7test.util.ServiceProvider;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.validation.constraints.Null;
 import java.util.List;
 
 /**
@@ -43,6 +45,11 @@ public class User {
     return userRepository.getAllUsersByGroupId(group.getId());
   }
 
+  public static List<User> getByLastName(String lastName) {
+    UserRepository userRepository = ServiceProvider.getService(UserRepository.class);
+    return userRepository.getUserByLastName(lastName);
+  }
+
   public void save() {
     UserRepository userRepository = ServiceProvider.getService(UserRepository.class);
     userRepository.putUser(this);
@@ -52,10 +59,16 @@ public class User {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private long id;
+  private Long id;
   private String firstName;
   private String lastName;
-  private long groupId;
+  private Long groupId;
+
+  protected User(long id, String firstName, String lastName) {
+    this.id = id;
+    this.firstName = firstName;
+    this.lastName = lastName;
+  }
 
   public User(final String firstName, final String lastName) {
     this.firstName = firstName;
@@ -63,7 +76,7 @@ public class User {
   }
 
   public String getId() {
-    return String.valueOf(id);
+    return id == null ? null:String.valueOf(id);
   }
 
   public String getFirstName() {
@@ -76,5 +89,30 @@ public class User {
 
   public void setLastName(final String lastName) {
     this.lastName = lastName;
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+
+    final User user = (User) o;
+    if (id != null && user.id != null) {
+      return id == user.id;
+    } else {
+      return this == user;
+    }
+  }
+
+  @Override
+  public int hashCode() {
+    int result = (int) (id == null ? 0:(id ^ (id >>> 32)));
+    result = 31 * result + firstName.hashCode();
+    result = 31 * result + lastName.hashCode();
+    return result;
   }
 }

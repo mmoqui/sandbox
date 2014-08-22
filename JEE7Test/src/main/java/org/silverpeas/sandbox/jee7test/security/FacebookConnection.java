@@ -10,12 +10,16 @@ import org.springframework.social.oauth2.OAuth2Operations;
 import javax.annotation.PostConstruct;
 import javax.inject.Named;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author mmoquillon
  */
 @Named("facebookConnection")
 public class FacebookConnection implements SocialNetworkConnection {
+
+  private static Logger logger = Logger.getLogger(FacebookConnection.class.getSimpleName());
   private String consumerKey;
   private String secretKey;
   private FacebookConnectionFactory connectionFactory;
@@ -30,7 +34,7 @@ public class FacebookConnection implements SocialNetworkConnection {
 
   @Override
   public OAuthToken connect(final OAuthCredentials credentials) {
-    System.out.println("CONNECTION WITH FACEBOOK...");
+    logger.log(Level.INFO, "CONNECTION WITH FACEBOOK...");
     OAuth2Operations oauthOperations = connectionFactory. getOAuthOperations();
     return new OAuthToken(consumerKey, secretKey);
   }

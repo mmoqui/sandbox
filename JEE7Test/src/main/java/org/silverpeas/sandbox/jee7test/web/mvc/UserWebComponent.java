@@ -15,13 +15,17 @@ import java.util.List;
 @Named("userWebComponent")
 public class UserWebComponent implements WebComponent {
 
+  public static final String ALL_USERS = "users";
+  public static final String FIRST_NAME = "firstName";
+  public static final String LAST_NAME = "lastName";
+
   @GET
   @Path("all")
   @View("/users.jsp")
   public Parameters getAllUsers(Parameters parameters) {
     Parameters result = new Parameters();
     List<User> users = User.getAll();
-    result.put("users", users);
+    result.put(ALL_USERS, users);
     return  result;
   }
 
@@ -29,8 +33,8 @@ public class UserWebComponent implements WebComponent {
   @Path("newUser")
   @View("/users.jsp")
   public Parameters createUser(Parameters parameters) {
-    String firstName = parameters.get("firstName");
-    String lastName = parameters.get("lastName");
+    String firstName = parameters.get(FIRST_NAME);
+    String lastName = parameters.get(LAST_NAME);
     User user = new User(firstName, lastName);
     user.save();
     return getAllUsers(parameters);
