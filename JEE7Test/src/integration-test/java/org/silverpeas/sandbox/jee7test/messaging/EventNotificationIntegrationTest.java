@@ -21,7 +21,7 @@ import static org.junit.Assert.assertThat;
  * @author mmoquillon
  */
 @RunWith(Arquillian.class)
-public class EventNotificationTest {
+public class EventNotificationIntegrationTest {
 
   @Inject
   private EventNotifier notifier;

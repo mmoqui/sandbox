@@ -4,14 +4,13 @@ import org.silverpeas.sandbox.jee7test.messaging.EventNotifier;
 import org.silverpeas.sandbox.jee7test.repository.UserRepository;
 import org.silverpeas.sandbox.jee7test.util.ServiceProvider;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.validation.constraints.Null;
+import java.text.MessageFormat;
 import java.util.List;
 
 /**
@@ -25,6 +24,8 @@ import java.util.List;
 })
 @Entity
 public class User {
+
+  protected static final String USER_CREATED_PATTERN = "User {0} {1} created";
 
   protected User() {
 
@@ -54,7 +55,8 @@ public class User {
     UserRepository userRepository = ServiceProvider.getService(UserRepository.class);
     userRepository.putUser(this);
     EventNotifier notifier = ServiceProvider.getService(EventNotifier.class);
-    notifier.notify("User " + getFirstName() + " " + getLastName() + " created");
+    String userCreation = MessageFormat.format(USER_CREATED_PATTERN, getFirstName(), getLastName());
+    notifier.notify(userCreation);
   }
 
   @Id

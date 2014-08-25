@@ -14,45 +14,31 @@ import java.util.stream.Collectors;
  */
 public final class ServiceProvider {
 
-  private static ServiceProvider instance = new ServiceProvider();
+  // by default, in Silverpeas, we use a CDI container
+  private static BeanContainer container = new CDIContainer();
 
   private ServiceProvider() {
 
   }
 
   public static <T> T getService(Class<T> type) {
-    BeanManager beanManager = CDI.current().getBeanManager();
-    Bean<T> bean = (Bean<T>) beanManager.getBeans(type).stream()
-        .findFirst()
-        .orElseThrow(
-          () -> new IllegalStateException("Cannot find an instance of type " + type.getName()));
-    CreationalContext<T> ctx = beanManager.createCreationalContext(bean);
-    T service = (T) beanManager.getReference(bean, type, ctx);
-
-    return service;
+    return container.getBeanByType(type);
   }
 
   public static <T> T getService(String name) {
-    BeanManager beanManager = CDI.current().getBeanManager();
-    Bean<T> bean = (Bean<T>) beanManager.getBeans(name).stream()
-        .findFirst()
-        .orElseThrow(() -> new IllegalStateException("Cannot find an instance of name " + name));
-    CreationalContext<T> ctx = beanManager.createCreationalContext(bean);
-    Type type = bean.getTypes().stream().findFirst().get();
-    T service = (T) beanManager.getReference(bean, type, ctx);
-
-    return service;
+    return container.getBeanByName(name);
   }
 
   public static <T> Set<T> getAllServices(Class<T> type) {
-    BeanManager beanManager = CDI.current().getBeanManager();
-    Set<T> services = beanManager.getBeans(type).stream()
-        .map(bean -> {
-          CreationalContext ctx = beanManager.createCreationalContext(bean);
-          return (T) beanManager.getReference(bean, type, ctx);
-    })
-        .collect(Collectors.toSet());
-    return services;
+    return container.getAllBeansByType(type);
+  }
+
+  /**
+   * Change the current bean container by the specified one.
+   * @param beanContainer the bean container to use.
+   */
+  public static void setBeanContainer(final BeanContainer beanContainer) {
+    container = beanContainer;
   }
 
 }

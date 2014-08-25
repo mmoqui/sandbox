@@ -1,10 +1,11 @@
-package org.silverpeas.sandbox.jee7test.web.mvc;
+package org.silverpeas.sandbox.jee7test.model;
 
 import com.ninja_squad.dbsetup.DbSetup;
 import com.ninja_squad.dbsetup.DbSetupTracker;
 import com.ninja_squad.dbsetup.Operations;
 import com.ninja_squad.dbsetup.destination.DataSourceDestination;
 import com.ninja_squad.dbsetup.operation.Operation;
+import org.hamcrest.CoreMatchers;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.Archive;
@@ -17,25 +18,35 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.silverpeas.sandbox.jee7test.model.User;
-import org.silverpeas.sandbox.jee7test.model.UserBuilder;
+import org.silverpeas.sandbox.jee7test.repository.UserRepository;
 import org.silverpeas.sandbox.jee7test.service.MessageBucket;
+import org.silverpeas.sandbox.jee7test.util.ServiceProvider;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
 import javax.sql.DataSource;
+import javax.transaction.Transactional;
+
 import java.io.File;
 import java.util.List;
+import java.util.Timer;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.silverpeas.sandbox.jee7test.model.UserBuilder.aNewUser;
 import static org.silverpeas.sandbox.jee7test.model.UserBuilder.anExistingUser;
 
 /**
  * @author mmoquillon
  */
+
+/**
+ * In a such test, we check the named queries are correct.
+ */
 @RunWith(Arquillian.class)
-public class UserWebComponentTest {
+public class UserPersistenceIntegrationTest {
 
   public static final Operation CLEAN_UP = Operations.deleteAllFrom("User");
   public static final Operation USER_SET_UP = Operations.insertInto("User")
@@ -45,7 +56,7 @@ public class UserWebComponentTest {
       .build();
 
   @Inject
-  private UserWebComponent webComponent;
+  private MessageBucket messageBucket;
   @Resource
   private DataSource dataSource;
   private DbSetupTracker dbSetupTracker = new DbSetupTracker();
@@ -63,7 +74,7 @@ public class UserWebComponentTest {
   public static Archive<?> createTestArchive() {
     File[] libs = Maven.resolver()
         .loadPomFromFile("pom.xml")
-        .resolve("com.ninja-squad:DbSetup")
+        .resolve("org.mockito:mockito-all", "com.ninja-squad:DbSetup")
         .withTransitivity()
         .asFile();
     return ShrinkWrap.create(WebArchive.class, "test.war")
@@ -71,7 +82,6 @@ public class UserWebComponentTest {
         .addPackage("org.silverpeas.sandbox.jee7test.repository")
         .addPackage("org.silverpeas.sandbox.jee7test.messaging")
         .addPackage("org.silverpeas.sandbox.jee7test.service")
-        .addPackage("org.silverpeas.sandbox.jee7test.web.mvc")
         .addPackage("org.silverpeas.sandbox.jee7test.util")
         .addAsLibraries(libs)
         .addAsResource("META-INF/test-persistence.xml", "META-INF/persistence.xml")
@@ -85,30 +95,39 @@ public class UserWebComponentTest {
   }
 
   @Test
-  public void askingForAllUsersShouldReturnAllOfThem() {
-    Parameters parameters = webComponent.getAllUsers(new Parameters());
-
-    assertThat(parameters.contains(UserWebComponent.ALL_USERS), is(true));
-    List<User> actualUsers = parameters.get(UserWebComponent.ALL_USERS);
-    assertThat(actualUsers.size(), is(2));
-    assertThat(actualUsers.contains(anExistingUser(0, "Edouard", "Lafortin")), is(true));
-    assertThat(actualUsers.contains(anExistingUser(1, "Rohan", "Lapointe")), is(true));
+  public void getAnExistingUserShouldReturnNothing() {
+    dbSetupTracker.skipNextLaunch();
+    User user = User.getById("2");
+    assertThat(user, nullValue());
   }
 
   @Test
-  public void addANewUserShouldPersistIt() {
-    final String firstName = "Toto";
-    final String lastName = "Chez-les-papoos";
-    Parameters parameters = new Parameters();
-    parameters.put(UserWebComponent.FIRST_NAME, firstName);
-    parameters.put(UserWebComponent.LAST_NAME, lastName);
-    parameters = webComponent.createUser(parameters);
+  public void getAUserByItsLastNameShouldReturnIt() {
+    dbSetupTracker.skipNextLaunch();
+    User expectedUser = anExistingUser(1, "Rohan", "Lapointe");
+    List<User> users = User.getByLastName(expectedUser.getLastName());
+    assertThat(users.size(), is(1));
+    assertThat(users.get(0), is(expectedUser));
+  }
 
-    assertThat(parameters.contains(UserWebComponent.ALL_USERS), is(true));
-    List<User> actualUsers = parameters.get(UserWebComponent.ALL_USERS);
-    assertThat(actualUsers.size(), is(3));
-    assertThat(actualUsers.contains(anExistingUser(0, "Edouard", "Lafortin")), is(true));
-    assertThat(actualUsers.contains(anExistingUser(1, "Rohan", "Lapointe")), is(true));
-    assertThat(actualUsers.contains(anExistingUser(2, firstName, lastName)), is(true));
+  @Test
+  public void persistANewUserShouldCreateIt() {
+    User newUser = aNewUser("Toto", "Chez-les-papoos");
+    newUser.save();
+    assertThat(newUser.getId(), notNullValue());
+
+    User actualUser = User.getById(newUser.getId());
+    assertThat(actualUser, is(newUser));
+  }
+
+  @Test
+  public void persistANewUserShouldNotifyIt() throws InterruptedException {
+    User newUser = aNewUser("Toto", "Chez-les-papoos");
+    newUser.save();
+    assertThat(newUser.getId(), notNullValue());
+
+    Thread.sleep(1000); // wait for the JMS notification
+
+    assertThat(messageBucket.getContent().size(), is(1));
   }
 }
