@@ -1,44 +1,42 @@
 package org.silverpeas.sandbox.jee7test.util;
 
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.CDI;
-import java.lang.reflect.Type;
 import java.util.Iterator;
+import java.util.ServiceLoader;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @author mmoquillon
  */
 public final class ServiceProvider {
 
-  // by default, in Silverpeas, we use a CDI container
-  private static BeanContainer container = new CDIContainer();
+  private static BeanContainer _currentContainer = null;
 
   private ServiceProvider() {
-
   }
 
   public static <T> T getService(Class<T> type) {
-    return container.getBeanByType(type);
+    return beanContainer().getBeanByType(type);
   }
 
   public static <T> T getService(String name) {
-    return container.getBeanByName(name);
+    return beanContainer().getBeanByName(name);
   }
 
   public static <T> Set<T> getAllServices(Class<T> type) {
-    return container.getAllBeansByType(type);
+    return beanContainer().getAllBeansByType(type);
   }
 
-  /**
-   * Change the current bean container by the specified one.
-   * @param beanContainer the bean container to use.
-   */
-  public static void setBeanContainer(final BeanContainer beanContainer) {
-    container = beanContainer;
+  private static BeanContainer beanContainer() {
+    if (_currentContainer == null) {
+      Iterator<BeanContainer> iterator = ServiceLoader.load(BeanContainer.class).iterator();
+      if (iterator.hasNext()) {
+        _currentContainer = iterator.next();
+      } else {
+        throw new RuntimeException(
+            "No IoD container detected! At least one bean container should be available!");
+      }
+    }
+    return _currentContainer;
   }
 
 }

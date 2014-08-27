@@ -7,7 +7,10 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.silverpeas.sandbox.jee7test.messaging.EventNotifier;
 import org.silverpeas.sandbox.jee7test.model.User;
+import org.silverpeas.sandbox.jee7test.model.UserBuilder;
 import org.silverpeas.sandbox.jee7test.repository.UserRepository;
+import org.silverpeas.sandbox.jee7test.repository.UserRepositoryProvider;
+import org.silverpeas.sandbox.jee7test.test.util.TestBeanContainer;
 import org.silverpeas.sandbox.jee7test.util.BeanContainer;
 import org.silverpeas.sandbox.jee7test.util.ServiceProvider;
 
@@ -19,7 +22,10 @@ import java.util.List;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 import static org.silverpeas.sandbox.jee7test.model.UserBuilder.anExistingUser;
+import static org.silverpeas.sandbox.jee7test.model.UserBuilder.mockUserRepositoryProvider;
+import static org.silverpeas.sandbox.jee7test.test.util.TestBeanContainer.getMockedBeanContainer;
 
 /**
  * @author mmoquillon
@@ -32,12 +38,12 @@ public class UserWebComponentTest {
 
   @Before
   public void prepareCommonBehaviors() {
-    BeanContainer beanContainer = mock(BeanContainer.class);
-    ServiceProvider.setBeanContainer(beanContainer);
+    BeanContainer beanContainer = getMockedBeanContainer();
+    UserRepositoryProvider userRepositoryProvider = mockUserRepositoryProvider();
     userRepository = mock(UserRepository.class);
     eventNotifier = mock(EventNotifier.class);
 
-    when(beanContainer.getBeanByType(UserRepository.class)).thenReturn(userRepository);
+    when(userRepositoryProvider.getBean()).thenReturn(userRepository);
     when(beanContainer.getBeanByType(EventNotifier.class)).thenReturn(eventNotifier);
     when(userRepository.getAllUsers()).thenReturn(Arrays.asList(
             anExistingUser(0, "Edouard", "Lafortin"), anExistingUser(1, "Rohan", "Lapointe"))

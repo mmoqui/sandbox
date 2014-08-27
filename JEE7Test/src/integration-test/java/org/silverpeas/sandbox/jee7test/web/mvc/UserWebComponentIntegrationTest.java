@@ -72,9 +72,11 @@ public class UserWebComponentIntegrationTest {
         .addPackage("org.silverpeas.sandbox.jee7test.messaging")
         .addPackage("org.silverpeas.sandbox.jee7test.service")
         .addPackage("org.silverpeas.sandbox.jee7test.web.mvc")
-        .addPackage("org.silverpeas.sandbox.jee7test.util")
+        .addPackages(true, "org.silverpeas.sandbox.jee7test.util")
         .addAsLibraries(libs)
         .addAsResource("META-INF/test-persistence.xml", "META-INF/persistence.xml")
+        .addAsResource("META-INF/services/test-org.silverpeas.sandbox.jee7test.util.BeanContainer",
+            "META-INF/services/org.silverpeas.sandbox.jee7test.util.BeanContainer")
         .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
         .addAsWebInfResource("test-ds.xml", "test-ds.xml");
   }

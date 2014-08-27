@@ -2,6 +2,7 @@ package org.silverpeas.sandbox.jee7test.model;
 
 import org.silverpeas.sandbox.jee7test.messaging.EventNotifier;
 import org.silverpeas.sandbox.jee7test.repository.UserRepository;
+import org.silverpeas.sandbox.jee7test.repository.UserRepositoryProvider;
 import org.silverpeas.sandbox.jee7test.util.ServiceProvider;
 
 import javax.persistence.Entity;
@@ -26,33 +27,34 @@ import java.util.List;
 public class User {
 
   protected static final String USER_CREATED_PATTERN = "User {0} {1} created";
+  protected static UserRepositoryProvider userRepositoryProvider = new UserRepositoryProvider();
 
   protected User() {
 
   }
 
   public static User getById(String userId) {
-    UserRepository userRepository = ServiceProvider.getService(UserRepository.class);
+    UserRepository userRepository = userRepositoryProvider.getBean();
     return userRepository.getUserById(userId);
   }
 
   public static List<User> getAll() {
-    UserRepository userRepository = ServiceProvider.getService(UserRepository.class);
+    UserRepository userRepository = userRepositoryProvider.getBean();
     return userRepository.getAllUsers();
   }
 
   public static List<User> getAllInGroup(UserGroup group) {
-    UserRepository userRepository = ServiceProvider.getService(UserRepository.class);
+    UserRepository userRepository = userRepositoryProvider.getBean();
     return userRepository.getAllUsersByGroupId(group.getId());
   }
 
   public static List<User> getByLastName(String lastName) {
-    UserRepository userRepository = ServiceProvider.getService(UserRepository.class);
+    UserRepository userRepository = userRepositoryProvider.getBean();
     return userRepository.getUserByLastName(lastName);
   }
 
   public void save() {
-    UserRepository userRepository = ServiceProvider.getService(UserRepository.class);
+    UserRepository userRepository = userRepositoryProvider.getBean();
     userRepository.putUser(this);
     EventNotifier notifier = ServiceProvider.getService(EventNotifier.class);
     String userCreation = MessageFormat.format(USER_CREATED_PATTERN, getFirstName(), getLastName());
@@ -117,4 +119,5 @@ public class User {
     result = 31 * result + lastName.hashCode();
     return result;
   }
+
 }

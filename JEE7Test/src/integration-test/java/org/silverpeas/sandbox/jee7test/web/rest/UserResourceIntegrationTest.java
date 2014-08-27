@@ -77,9 +77,11 @@ public class UserResourceIntegrationTest {
         .addPackage("org.silverpeas.sandbox.jee7test.service")
         .addPackage("org.silverpeas.sandbox.jee7test.security")
         .addPackages(true, "org.silverpeas.sandbox.jee7test.web")
-        .addPackage("org.silverpeas.sandbox.jee7test.util")
+        .addPackages(true, "org.silverpeas.sandbox.jee7test.util")
         .addAsLibraries(libs)
         .addAsResource("META-INF/test-persistence.xml", "META-INF/persistence.xml")
+        .addAsResource("META-INF/services/test-org.silverpeas.sandbox.jee7test.util.BeanContainer",
+            "META-INF/services/org.silverpeas.sandbox.jee7test.util.BeanContainer")
         .addAsResource("test-socialNetwork.properties", "socialNetwork.properties")
         .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
         .addAsWebInfResource("test-ds.xml", "test-ds.xml");

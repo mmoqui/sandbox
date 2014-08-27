@@ -1,17 +1,17 @@
 package org.silverpeas.sandbox.jee7test.web.rest;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runners.model.Statement;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.silverpeas.sandbox.jee7test.messaging.EventNotifier;
 import org.silverpeas.sandbox.jee7test.model.User;
 import org.silverpeas.sandbox.jee7test.repository.UserRepository;
+import org.silverpeas.sandbox.jee7test.repository.UserRepositoryProvider;
 import org.silverpeas.sandbox.jee7test.test.util.Reflection;
+import org.silverpeas.sandbox.jee7test.test.util.TestBeanContainer;
 import org.silverpeas.sandbox.jee7test.util.BeanContainer;
 import org.silverpeas.sandbox.jee7test.util.ServiceProvider;
 
@@ -21,20 +21,17 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import java.lang.reflect.Field;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.silverpeas.sandbox.jee7test.model.UserBuilder.aNewUser;
-import static org.silverpeas.sandbox.jee7test.model.UserBuilder.anExistingUser;
+import static org.silverpeas.sandbox.jee7test.model.UserBuilder.*;
+import static org.silverpeas.sandbox.jee7test.test.util.TestBeanContainer.getMockedBeanContainer;
 
 /**
  * @author mmoquillon
@@ -50,17 +47,18 @@ public class UserResourceTest {
 
   @Before
   public void prepareCommonBehaviors() throws Exception {
-    BeanContainer beanContainer = mock(BeanContainer.class);
-    ServiceProvider.setBeanContainer(beanContainer);
+    BeanContainer beanContainer = getMockedBeanContainer();
+    UserRepositoryProvider userRepositoryProvider = mockUserRepositoryProvider();
     userRepository = mock(UserRepository.class);
     eventNotifier = mock(EventNotifier.class);
+
     UriInfo uriInfo = mock(UriInfo.class);
     UriBuilder uriBuilder = mock(UriBuilder.class);
 
     Field dependency = UserResource.class.getDeclaredField("uriInfo");
     Reflection.setField(userResource, dependency, uriInfo);
 
-    when(beanContainer.getBeanByType(UserRepository.class)).thenReturn(userRepository);
+    when(userRepositoryProvider.getBean()).thenReturn(userRepository);
     when(beanContainer.getBeanByType(EventNotifier.class)).thenReturn(eventNotifier);
     when(userRepository.getAllUsers()).thenReturn(Arrays.asList(
             anExistingUser(0, "Edouard", "Lafortin"), anExistingUser(1, "Rohan", "Lapointe"))

@@ -4,6 +4,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.silverpeas.sandbox.jee7test.messaging.EventNotifier;
 import org.silverpeas.sandbox.jee7test.repository.UserRepository;
+import org.silverpeas.sandbox.jee7test.repository.UserRepositoryProvider;
+import org.silverpeas.sandbox.jee7test.test.util.TestBeanContainer;
 import org.silverpeas.sandbox.jee7test.util.BeanContainer;
 import org.silverpeas.sandbox.jee7test.util.ServiceProvider;
 
@@ -17,6 +19,8 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 import static org.silverpeas.sandbox.jee7test.model.UserBuilder.aNewUser;
 import static org.silverpeas.sandbox.jee7test.model.UserBuilder.anExistingUser;
+import static org.silverpeas.sandbox.jee7test.model.UserBuilder.mockUserRepositoryProvider;
+import static org.silverpeas.sandbox.jee7test.test.util.TestBeanContainer.getMockedBeanContainer;
 
 /**
  * @author mmoquillon
@@ -28,12 +32,12 @@ public class UserTest {
 
   @Before
   public void prepareCommonBehaviors() {
-    BeanContainer beanContainer = mock(BeanContainer.class);
-    ServiceProvider.setBeanContainer(beanContainer);
+    BeanContainer beanContainer = getMockedBeanContainer();
+    UserRepositoryProvider userRepositoryProvider = mockUserRepositoryProvider();
     userRepository = mock(UserRepository.class);
     eventNotifier = mock(EventNotifier.class);
 
-    when(beanContainer.getBeanByType(UserRepository.class)).thenReturn(userRepository);
+    when(userRepositoryProvider.getBean()).thenReturn(userRepository);
     when(beanContainer.getBeanByType(EventNotifier.class)).thenReturn(eventNotifier);
     when(userRepository.getAllUsers()).thenReturn(Collections.<User>emptyList());
   }
