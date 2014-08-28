@@ -4,6 +4,8 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
 <c:set var="users" value="${requestScope.users}"/>
+<c:url var="usersUrl" value="/RUsers/all"/>
+<c:url var="docsUrl" value="/RDocument/all"/>
 <c:url var="newUserUrl" value="/RUsers/newUser"/>
 <c:url var="bundleUrl" value="/RBundle/view"/>
 <html>
@@ -12,6 +14,10 @@
 </head>
 <body>
 <h2>The users</h2>
+<div id="menu">
+  <a href="${usersUrl}">Manage users</a>&nbsp;&nbsp;
+  <a href="${docsUrl}">Manage documents</a>
+</div>
 <ul>
   <c:forEach var="user" items="${users}">
     <li>${user.firstName} ${user.lastName}</li>

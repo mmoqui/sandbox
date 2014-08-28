@@ -1,6 +1,15 @@
 package org.silverpeas.sandbox.jee7test.web.mvc;
 
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileUpload;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.RequestContext;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.fileupload.servlet.ServletRequestContext;
+import org.apache.commons.io.FileUtils;
 import org.silverpeas.sandbox.jee7test.util.ServiceProvider;
+import org.silverpeas.sandbox.jee7test.web.mvc.annotation.Binary;
 import org.silverpeas.sandbox.jee7test.web.mvc.annotation.View;
 
 import javax.servlet.ServletConfig;
@@ -11,7 +20,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.WebApplicationException;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -22,10 +35,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.apache.commons.fileupload.disk.DiskFileItemFactory.DEFAULT_SIZE_THRESHOLD;
+
 /**
  * @author mmoquillon
  */
 public class GenericRequestRouter extends HttpServlet {
+
+  /**
+   * The name of a default parameter set when a file is uploaded.
+   */
+  public static final String ERROR_MESSAGE = "ErrorMessage";
 
   private WebComponent webComponent;
   private Map<String, List<Method>> invokables = new HashMap<>();
@@ -59,59 +79,103 @@ public class GenericRequestRouter extends HttpServlet {
   @Override
   protected void doGet(final HttpServletRequest req, final HttpServletResponse resp)
       throws ServletException, IOException {
-    String view = invoke(req, GET.class.getSimpleName());
-    req.getRequestDispatcher(view).forward(req, resp);
+    try {
+      RoutingResponse response = invoke(req, GET.class.getSimpleName());
+      response.routes(req, resp);
+    } catch(WebApplicationException ex) {
+      ex.printStackTrace();
+      resp.sendError(ex.getResponse().getStatus(), ex.getMessage());
+    }
   }
 
   @Override
   protected void doPost(final HttpServletRequest req, final HttpServletResponse resp)
       throws ServletException, IOException {
-    String view = invoke(req, POST.class.getSimpleName());
-    req.getRequestDispatcher(view).forward(req, resp);
+    try {
+      RoutingResponse response = invoke(req, POST.class.getSimpleName());
+      response.routes(req, resp);
+    } catch(WebApplicationException ex) {
+      ex.printStackTrace();
+      resp.sendError(ex.getResponse().getStatus(), ex.getMessage());
+    }
   }
 
   private WebComponent getWebComponent() {
     return webComponent;
   }
 
-  private String invoke(HttpServletRequest request, String type) {
+  private RoutingResponse invoke(HttpServletRequest request, String type) {
     String requestURI = request.getRequestURI();
     int index = requestURI.indexOf(request.getServletPath()) + request.getServletPath().length();
     final String path = requestURI.substring(index);
-    Parameters result = null;
+    RoutingResponse response = null;
     String nextView = "/error.jsp";
     for (Method method : invokables.get(type)) {
       Path supportedPath = method.getAnnotation(Path.class);
       if (path.equalsIgnoreCase(supportedPath.value()) ||
           path.equalsIgnoreCase("/" + supportedPath.value())) {
         try {
-          Parameters parameters = new Parameters();
-          Enumeration<String> requestParams = request.getParameterNames();
-          while (requestParams.hasMoreElements()) {
-            String paramName = requestParams.nextElement();
-            parameters.put(paramName, request.getParameter(paramName));
+          Parameters parameters;
+          RequestContext ctx = new ServletRequestContext(request);
+          if (FileUpload.isMultipartContent(ctx)) {
+            parameters = fetchMultipartParameters(ctx);
+          } else {
+            parameters = fetcPlainParameters(request);
           }
-          result = (Parameters) method.invoke(getWebComponent(), parameters);
-          nextView = method.getAnnotation(View.class).value();
-        } catch (IllegalAccessException e) {
+          Parameters result = (Parameters) method.invoke(getWebComponent(), parameters);
+          if (result instanceof BinaryContent) {
+            response = new ContentOutput((BinaryContent)result);
+          } else {
+            nextView = method.getAnnotation(View.class).value();
+            response = new ViewForward(nextView, result);
+          }
+        } catch (WebApplicationException ex) {
+          throw ex;
+        } catch (Exception e) {
           e.printStackTrace();
-        } catch (InvocationTargetException e) {
-          e.printStackTrace();
+          Parameters result = new Parameters();
+          result.put(ERROR_MESSAGE, e.getMessage());
+          response = new ViewForward(nextView, result);
         }
         break;
       }
     }
-    if (result == null) {
-      result = new Parameters();
+    if (response == null) {
+      response = new ViewForward(nextView, new Parameters());
     }
-    setResultInRequest(result, request);
-    return nextView;
+
+    return response;
   }
 
-  private void setResultInRequest(Parameters result, HttpServletRequest request) {
-    Set<String> parameterNames = result.getParameterNames();
-    for (String paramName : parameterNames) {
-      request.setAttribute(paramName, result.get(paramName));
+  private BinaryContent fetchMultipartParameters(RequestContext ctx)
+      throws FileUploadException, IOException {
+    BinaryContent parameters = new BinaryContent();
+    File uploadDir = FileUtils.getTempDirectory();
+    DiskFileItemFactory fileItemFactory = new DiskFileItemFactory(DEFAULT_SIZE_THRESHOLD,
+        uploadDir);
+    ServletFileUpload upload = new ServletFileUpload(fileItemFactory);
+    List<FileItem> items = upload.parseRequest(ctx);
+    for(FileItem item: items) {
+      if (item.isFormField()) {
+        parameters.put(item.getFieldName(), item.getString());
+      } else {
+        parameters.setContentType(item.getContentType());
+        parameters.setInputStream(item.getInputStream(), item.getSize());
+        parameters.setContentName(item.getName());
+        parameters.put(item.getFieldName(), item.getName());
+      }
     }
+
+    return parameters;
+  }
+
+  private Parameters fetcPlainParameters(HttpServletRequest request) {
+    Parameters parameters = new Parameters();
+    Enumeration<String> requestParams = request.getParameterNames();
+    while (requestParams.hasMoreElements()) {
+      String paramName = requestParams.nextElement();
+      parameters.put(paramName, request.getParameter(paramName));
+    }
+    return parameters;
   }
 }

@@ -23,6 +23,14 @@
       <param-value>bundleWebComponent</param-value>
     </init-param>
   </servlet>
+  <servlet>
+    <servlet-name>DocumentServlet</servlet-name>
+    <servlet-class>org.silverpeas.sandbox.jee7test.web.mvc.GenericRequestRouter</servlet-class>
+    <init-param>
+      <param-name>WebComponent</param-name>
+      <param-value>documentWebComponent</param-value>
+    </init-param>
+  </servlet>
   <servlet-mapping>
     <servlet-name>UserServlet</servlet-name>
     <url-pattern>/RUsers/*</url-pattern>
@@ -30,5 +38,9 @@
   <servlet-mapping>
     <servlet-name>BundleServlet</servlet-name>
     <url-pattern>/RBundle/*</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>DocumentServlet</servlet-name>
+    <url-pattern>/RDocument/*</url-pattern>
   </servlet-mapping>
 </web-app>

@@ -1,5 +1,6 @@
 package org.silverpeas.sandbox.jee7test.web.mvc;
 
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -10,6 +11,7 @@ import java.util.Set;
 public class Parameters {
 
   private Map<String, Object> p = new HashMap<>();
+
 
   public <T> T get(String parameterName) {
     return (T) p.get(parameterName);

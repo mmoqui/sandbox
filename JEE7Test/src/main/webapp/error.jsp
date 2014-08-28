@@ -7,10 +7,12 @@
 <c:url var="docsUrl" value="/RDocument/all"/>
 <html>
 <body>
-<h2>Hello World!</h2>
+<h2>Oups!</h2>
 <div id="menu">
   <a href="${usersUrl}">Manage users</a>&nbsp;&nbsp;
   <a href="${docsUrl}">Manage documents</a>
 </div>
+<p>An error has occurred while processing your request.</p>
+<p>${requestScope.ErrorMessage}</p>
 </body>
 </html>
