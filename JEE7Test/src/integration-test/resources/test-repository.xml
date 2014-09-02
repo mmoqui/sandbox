@@ -43,7 +43,7 @@
     -->
     <PersistenceManager class="org.apache.jackrabbit.core.persistence.pool.H2PersistenceManager">
       <param name="driver" value="javax.naming.InitialContext"/>
-      <param name="url" value="java:/datasources/jcr"/>
+      <param name="url" value="java:/datasources/DocumentStore"/>
       <param name="schema" value="h2" />
       <param name="schemaObjectPrefix" value="JCR_" />
     </PersistenceManager>
@@ -71,7 +71,7 @@
   
     <PersistenceManager class="org.apache.jackrabbit.core.persistence.pool.H2PersistenceManager">
       <param name="driver" value="javax.naming.InitialContext"/>
-      <param name="url" value="java:/datasources/jcr"/>
+      <param name="url" value="java:/datasources/DocumentStore"/>
       <param name="schemaObjectPrefix" value="version_" />
     </PersistenceManager>
   </Versioning>

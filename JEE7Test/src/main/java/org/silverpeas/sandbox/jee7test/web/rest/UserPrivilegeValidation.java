@@ -3,6 +3,7 @@ package org.silverpeas.sandbox.jee7test.web.rest;
 import org.silverpeas.sandbox.jee7test.security.Authentication;
 import org.silverpeas.sandbox.jee7test.security.BasicCredentials;
 import org.silverpeas.sandbox.jee7test.security.OAuthCredentials;
+import org.silverpeas.sandbox.jee7test.security.SocialNetworkService;
 
 import javax.inject.Inject;
 import javax.security.auth.message.AuthException;
@@ -30,17 +31,19 @@ public class UserPrivilegeValidation {
     if (inLowerCaseChallenge.startsWith("basic ")) {
       basicAuthentication(challenge.substring("basic ".length()));
     } else if (inLowerCaseChallenge.startsWith("linkedin")) {
-      oauthAuthentication(challenge.substring("linkedin ".length()));
+      oauthAuthentication(SocialNetworkService.LinkedIn, challenge.substring("linkedin ".length()));
+    }  else if (inLowerCaseChallenge.startsWith("facebook")) {
+      oauthAuthentication(SocialNetworkService.Facebook, challenge.substring("facebook ".length()));
     }
   }
 
-  private void oauthAuthentication(final String challenge) {
+  private void oauthAuthentication(final SocialNetworkService service, final String challenge) {
     String encodedCredentials =
         new String(Base64.getDecoder().decode(challenge), Charset.forName("UTF-8"));
     int separatorIndex = encodedCredentials.indexOf(":");
     String token = encodedCredentials.substring(0, separatorIndex);
     String verifier = encodedCredentials.substring(separatorIndex + 1);
-    OAuthCredentials credentials = new OAuthCredentials(token, verifier);
+    OAuthCredentials credentials = new OAuthCredentials(service, token, verifier);
     try {
       authentication.authenticate(credentials);
     } catch (AuthException e) {

@@ -1,5 +1,6 @@
 package org.silverpeas.sandbox.jee7test.security;
 
+import org.silverpeas.sandbox.jee7test.security.annotation.SocialNetwork;
 import org.springframework.social.connect.UserProfile;
 import org.springframework.social.linkedin.connect.LinkedInConnectionFactory;
 import org.springframework.social.oauth1.OAuthToken;
@@ -7,6 +8,7 @@ import org.springframework.social.oauth2.OAuth2Operations;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Named;
+import javax.inject.Singleton;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -14,7 +16,8 @@ import java.util.logging.Logger;
 /**
  * @author mmoquillon
  */
-@Named("linkedInConnection")
+@SocialNetwork(SocialNetworkService.LinkedIn)
+@Singleton
 public class LinkedInConnection implements SocialNetworkConnection {
 
   private static Logger logger = Logger.getLogger(LinkedInConnection.class.getSimpleName());

@@ -1,12 +1,9 @@
 package org.silverpeas.sandbox.jee7test.jcr.repository;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.jackrabbit.core.RepositoryImpl;
-import org.apache.jackrabbit.core.config.RepositoryConfig;
 import org.silverpeas.sandbox.jee7test.jcr.model.Document;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.jcr.Binary;
 import javax.jcr.Node;
@@ -17,13 +14,6 @@ import javax.jcr.RepositoryException;
 import javax.jcr.Session;
 import javax.jcr.SimpleCredentials;
 import javax.jcr.nodetype.NodeType;
-import javax.jcr.query.QueryManager;
-import javax.jcr.query.QueryResult;
-import javax.jcr.query.qom.DescendantNode;
-import javax.jcr.query.qom.Ordering;
-import javax.jcr.query.qom.QueryObjectModel;
-import javax.jcr.query.qom.QueryObjectModelFactory;
-import javax.jcr.query.qom.Selector;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,7 +22,6 @@ import java.lang.reflect.Field;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -45,47 +34,18 @@ import java.util.logging.Logger;
 public class DocumentRepository {
 
   private static final String ID_PREFIX = "document_";
-  private static final String JCR_HOME = "jcr.home.dir";
-  private static final String JCR_CONFIG = "jcr.config";
 
+  @Inject
   private Repository jcr;
-
-  @PostConstruct
-  protected void init() {
-    try {
-      Logger.getLogger(getClass().getSimpleName()).log(Level.INFO, "JCR BOOTSTRAP...");
-      Properties jcrProperties = new Properties();
-      jcrProperties.load(getClass().getResourceAsStream("/jcr.properties"));
-      String jcrHomePath = jcrProperties.getProperty(JCR_HOME);
-      String jcrConfPath = jcrProperties.getProperty(JCR_CONFIG);
-
-      // the JCR is recreated each time the application is launched.
-      File jcrHome = new File(jcrHomePath);
-      if (jcrHome.exists()) {
-        FileUtils.deleteDirectory(jcrHome);
-      }
-      FileUtils.forceMkdir(jcrHome);
-      FileUtils.copyInputStreamToFile(getClass().getResourceAsStream("/repository.xml"),
-          new File(jcrConfPath));
-
-      RepositoryConfig config = RepositoryConfig.create(jcrConfPath, jcrHomePath);
-      jcr = RepositoryImpl.create(config);
-    } catch (IOException | RepositoryException ex) {
-      throw new JcrRepositoryException(ex.getMessage(), ex);
-    }
-  }
-
-  @PreDestroy
-  protected void shutdown() {
-    Logger.getLogger(getClass().getSimpleName()).log(Level.INFO, "JCR SHUTDOWN...");
-    ((RepositoryImpl) jcr).shutdown();
-  }
 
   protected Session openSession() throws RepositoryException {
     return jcr.login(new SimpleCredentials("admin", "admin".toCharArray()));
   }
 
-  protected void closeSession(Session session) {
+  protected void closeSession(Session session) throws RepositoryException {
+    if (session.hasPendingChanges()) {
+      session.save();
+    }
     session.logout();
   }
 
@@ -104,7 +64,7 @@ public class DocumentRepository {
       Calendar lastModificationDate = Calendar.getInstance();
       lastModificationDate.setTimeInMillis(document.getUpdateDate().getTime());
 
-      Node documentNode = root.addNode(computeNodeId(), NodeType.NT_FOLDER);
+      Node documentNode = root.addNode(documentId, NodeType.NT_FOLDER);
       Node fileNode = documentNode.addNode(document.getTitle(), NodeType.NT_FILE);
       fileNode.addMixin(NodeType.MIX_TITLE);
       fileNode.setProperty(Property.JCR_TITLE, document.getFileName());
@@ -201,4 +161,5 @@ public class DocumentRepository {
     field.setAccessible(true);
     field.set(document, value);
   }
+
 }

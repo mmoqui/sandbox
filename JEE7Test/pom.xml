@@ -53,6 +53,11 @@
       </exclusions>
     </dependency>
     <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>2.4</version>
+    </dependency>
+    <dependency>
       <groupId>org.springframework.social</groupId>
       <artifactId>spring-social-linkedin</artifactId>
       <version>1.0.1.RELEASE</version>
@@ -86,6 +91,12 @@
         </exclusion>
       </exclusions>
     </dependency>
+    <!-- jackrabbit -->
+    <dependency>
+      <groupId>javax.jcr</groupId>
+      <artifactId>jcr</artifactId>
+      <version>2.0</version>
+    </dependency>
     <dependency>
       <groupId>org.apache.jackrabbit</groupId>
       <artifactId>jackrabbit-api</artifactId>
@@ -97,6 +108,14 @@
       <version>${jackrabbit.version}</version>
       <exclusions>
         <exclusion>
+          <groupId>org.apache.jackrabbit</groupId>
+          <artifactId>jackrabbit-jcr-tests</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.jackrabbit</groupId>
+          <artifactId>jackrabbit-jcr-benchmark</artifactId>
+        </exclusion>
+        <exclusion>
           <groupId>org.apache.lucene</groupId>
           <artifactId>lucene-core</artifactId>
         </exclusion>
@@ -104,29 +123,26 @@
           <groupId>org.apache.derby</groupId>
           <artifactId>derby</artifactId>
         </exclusion>
-        <exclusion>
-          <groupId>org.bouncycastle</groupId>
-          <artifactId>bcmail</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.bouncycastle</groupId>
-          <artifactId>bcprov</artifactId>
-        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>javax.jcr</groupId>
-      <artifactId>jcr</artifactId>
-      <version>2.0</version>
-    </dependency>
-    <dependency>
       <groupId>org.apache.jackrabbit</groupId>
-      <artifactId>jackrabbit-jcr-commons</artifactId>
+      <artifactId>jackrabbit-data</artifactId>
       <version>${jackrabbit.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.jackrabbit</groupId>
-      <artifactId>jackrabbit-jcr-rmi</artifactId>
+      <artifactId>jackrabbit-spi</artifactId>
+      <version>${jackrabbit.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.jackrabbit</groupId>
+      <artifactId>jackrabbit-spi-commons</artifactId>
+      <version>${jackrabbit.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.jackrabbit</groupId>
+      <artifactId>jackrabbit-jcr-commons</artifactId>
       <version>${jackrabbit.version}</version>
     </dependency>
     <dependency>
@@ -146,16 +162,6 @@
     </dependency>
     <dependency>
       <groupId>org.apache.jackrabbit</groupId>
-      <artifactId>jackrabbit-spi</artifactId>
-      <version>${jackrabbit.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.jackrabbit</groupId>
-      <artifactId>jackrabbit-spi-commons</artifactId>
-      <version>${jackrabbit.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.jackrabbit</groupId>
       <artifactId>jackrabbit-webdav</artifactId>
       <version>${jackrabbit.version}</version>
       <exclusions>
@@ -169,6 +175,23 @@
         </exclusion>
       </exclusions>
     </dependency>
+    <!-- dependencies of Jackrabbit :-( -->
+    <dependency>
+      <groupId>concurrent</groupId>
+      <artifactId>concurrent</artifactId>
+      <version>1.3.4</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-collections</groupId>
+      <artifactId>commons-collections</artifactId>
+      <version>3.2.1</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-dbcp</groupId>
+      <artifactId>commons-dbcp</artifactId>
+      <version>1.3</version>
+    </dependency>
+    <!-- end of dependencies of Jackrabbit -->
     <dependency>
       <groupId>org.apache.tika</groupId>
       <artifactId>tika-core</artifactId>
@@ -183,6 +206,11 @@
       <groupId>org.apache.lucene</groupId>
       <artifactId>lucene-core</artifactId>
       <version>3.6.2</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-fileupload</groupId>
+      <artifactId>commons-fileupload</artifactId>
+      <version>1.3.1</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -240,7 +268,6 @@
     <jcr.home>${env.HOME}/tmp/jcr</jcr.home>
     <jcr.conf>${jcr.home}/repository.xml</jcr.conf>
     <wildfly.version>8.1.0.Final</wildfly.version>
-    <deltaspike.version>1.0.1</deltaspike.version>
     <jackrabbit.version>2.8.0</jackrabbit.version>
   </properties>
 
@@ -292,7 +319,24 @@
           <value>ci</value>
         </property>
       </activation>
+      <properties>
+        <jcr.home>${build.directory}/jcr</jcr.home>
+        <jcr.conf>${jcr.home}/repository.xml</jcr.conf>
+      </properties>
       <build>
+        <testResources>
+          <testResource>
+            <directory>src/integration-test/resources</directory>
+            <filtering>true</filtering>
+            <includes>
+              <include>**/*.properties</include>
+            </includes>
+          </testResource>
+          <testResource>
+            <directory>src/test/resources</directory>
+            <filtering>false</filtering>
+          </testResource>
+        </testResources>
         <plugins>
           <plugin>
             <groupId>org.codehaus.mojo</groupId>

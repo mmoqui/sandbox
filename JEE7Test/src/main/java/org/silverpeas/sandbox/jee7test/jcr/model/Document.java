@@ -97,4 +97,27 @@ public class Document implements Serializable {
     DocumentRepository repository = ServiceProvider.getService(DocumentRepository.class);
     repository.putDocument(this);
   }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+
+    final Document document = (Document) o;
+
+    if (id != null) {
+      return id.equals(document.getId());
+    }
+
+    return super.equals(o);
+  }
+
+  @Override
+  public int hashCode() {
+    return id != null ? id.hashCode() : super.hashCode();
+  }
 }
