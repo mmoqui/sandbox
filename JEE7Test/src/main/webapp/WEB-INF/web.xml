@@ -25,11 +25,27 @@
     </init-param>
   </servlet>
   <servlet>
+    <servlet-name>UserGroupServlet</servlet-name>
+    <servlet-class>org.silverpeas.sandbox.jee7test.web.mvc.GenericRequestRouter</servlet-class>
+    <init-param>
+      <param-name>WebComponent</param-name>
+      <param-value>userGroupWebComponent</param-value>
+    </init-param>
+  </servlet>
+  <servlet>
     <servlet-name>DocumentServlet</servlet-name>
     <servlet-class>org.silverpeas.sandbox.jee7test.web.mvc.GenericRequestRouter</servlet-class>
     <init-param>
       <param-name>WebComponent</param-name>
       <param-value>documentWebComponent</param-value>
+    </init-param>
+  </servlet>
+  <servlet>
+    <servlet-name>ComponentServlet</servlet-name>
+    <servlet-class>org.silverpeas.sandbox.jee7test.web.mvc.GenericRequestRouter</servlet-class>
+    <init-param>
+      <param-name>WebComponent</param-name>
+      <param-value>componentWebComponent</param-value>
     </init-param>
   </servlet>
   <servlet-mapping>
@@ -41,7 +57,15 @@
     <url-pattern>/RBundle/*</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
+    <servlet-name>UserGroupServlet</servlet-name>
+    <url-pattern>/RGroups/*</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
     <servlet-name>DocumentServlet</servlet-name>
     <url-pattern>/RDocument/*</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>ComponentServlet</servlet-name>
+    <url-pattern>/RComponents/*</url-pattern>
   </servlet-mapping>
 </web-app>

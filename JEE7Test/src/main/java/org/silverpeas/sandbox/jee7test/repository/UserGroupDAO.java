@@ -45,9 +45,11 @@ public class UserGroupDAO {
       while(rs.next()) {
           long id = rs.getLong("id");
           String name = rs.getString("name");
-          groups.add(new UserGroup(String.valueOf(id), name));
+          UserGroup userGroup = new UserGroup(name);
+          setId(userGroup, id);
+          groups.add(userGroup);
         }
-    } catch (SQLException e) {
+    } catch (SQLException|IllegalAccessException|NoSuchFieldException e) {
       e.printStackTrace();
     }
     return groups;
@@ -59,9 +61,7 @@ public class UserGroupDAO {
       statement.setLong(1, currentId);
       statement.setString(2, userGroup.getName());
       statement.executeUpdate();
-      Field idField = userGroup.getClass().getDeclaredField("id");
-      idField.setAccessible(true);
-      idField.set(userGroup, currentId++);
+      setId(userGroup, currentId++);
     } catch (SQLException e) {
       e.printStackTrace();
     } catch (IllegalAccessException e) {
@@ -69,5 +69,12 @@ public class UserGroupDAO {
     } catch (NoSuchFieldException e) {
       e.printStackTrace();
     }
+  }
+
+  private void setId(UserGroup userGroup, long id)
+      throws NoSuchFieldException, IllegalAccessException {
+    Field idField = UserGroup.class.getDeclaredField("id");
+    idField.setAccessible(true);
+    idField.set(userGroup, id);
   }
 }

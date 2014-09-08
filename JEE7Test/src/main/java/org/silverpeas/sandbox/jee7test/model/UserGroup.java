@@ -14,8 +14,7 @@ public class UserGroup {
 
   }
 
-  public UserGroup(String id, String name) {
-    this.id = Long.valueOf(id);
+  public UserGroup( String name) {
     this.name = name;
   }
 
@@ -34,4 +33,5 @@ public class UserGroup {
   public List<User> getUsers() {
     return User.getAllInGroup(this);
   }
+
 }

@@ -1,5 +1,6 @@
 package org.silverpeas.sandbox.jee7test.repository;
 
+import org.silverpeas.sandbox.jee7test.component.model.Component;
 import org.silverpeas.sandbox.jee7test.model.User;
 
 import javax.persistence.EntityManager;
@@ -15,7 +16,7 @@ import java.util.stream.Collectors;
  */
 public class UserRepository {
 
-  @PersistenceContext
+  @PersistenceContext(unitName = "jee7test")
   private EntityManager entityManager;
 
   public List<User> getAllUsers() {

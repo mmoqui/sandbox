@@ -2,10 +2,9 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
 
 <c:set var="users" value="${requestScope.users}"/>
-<c:url var="usersUrl" value="/RUsers/all"/>
-<c:url var="docsUrl" value="/RDocument/all"/>
 <c:url var="newUserUrl" value="/RUsers/newUser"/>
 <c:url var="bundleUrl" value="/RBundle/view"/>
 <html>
@@ -14,16 +13,14 @@
 </head>
 <body>
 <h2>The users</h2>
-<div id="menu">
-  <a href="${usersUrl}">Manage users</a>&nbsp;&nbsp;
-  <a href="${docsUrl}">Manage documents</a>
-</div>
+<t:menu></t:menu>
 <ul>
   <c:forEach var="user" items="${users}">
     <li>${user.firstName} ${user.lastName}</li>
   </c:forEach>
 </ul>
 <h3>New user</h3>
+<p>For each user, a group and a personal agenda will be created.</p>
 <form action="${newUserUrl}" method="POST">
   <%--@declare id="firstname"--%><label for="firstName">First name: </label>
   <input id="firstName" name="firstName" type="text"/>

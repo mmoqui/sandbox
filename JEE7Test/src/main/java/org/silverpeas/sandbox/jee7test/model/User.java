@@ -1,5 +1,6 @@
 package org.silverpeas.sandbox.jee7test.model;
 
+import org.silverpeas.sandbox.jee7test.component.model.Component;
 import org.silverpeas.sandbox.jee7test.messaging.EventNotifier;
 import org.silverpeas.sandbox.jee7test.repository.UserRepository;
 import org.silverpeas.sandbox.jee7test.repository.UserRepositoryProvider;

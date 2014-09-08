@@ -2,10 +2,9 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@taglib prefix="t" tagdir="/WEB-INF/tags" %>
 
 <c:set var="documents" value="${requestScope.documents}"/>
-<c:url var="usersUrl" value="/RUsers/all"/>
-<c:url var="docsUrl" value="/RDocument/all"/>
 <c:url var="docUrl" value="/RDocument/document"/>
 <c:url var="newDocumentUrl" value="/RDocument/import"/>
 <html>
@@ -15,10 +14,7 @@
 <body>
 <h2>The documents</h2>
 
-<div id="menu">
-  <a href="${usersUrl}">Manage users</a>&nbsp;&nbsp;
-  <a href="${docsUrl}">Manage documents</a>
-</div>
+<t:menu></t:menu>
 <ul>
   <c:forEach var="doc" items="${documents}">
     <li><a href="${docUrl}?id=${doc.id}">${doc.title} (${doc.updateDate})</a></li>
