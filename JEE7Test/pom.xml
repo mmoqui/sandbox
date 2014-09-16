@@ -325,7 +325,7 @@
         </property>
       </activation>
       <properties>
-        <jcr.home>${build.directory}/jcr</jcr.home>
+        <jcr.home>${project.build.directory}/jcr</jcr.home>
         <jcr.conf>${jcr.home}/repository.xml</jcr.conf>
       </properties>
       <build>
@@ -401,11 +401,13 @@
             <configuration>
               <forkCount>1</forkCount>
               <reuseForks>true</reuseForks>
+              <environmentVariables>
+                <JBOSS_HOME>${project.build.directory}/wildfly-8.1.0.Final</JBOSS_HOME>
+              </environmentVariables>
               <systemPropertyVariables>
-                <java.util.logging.manager>org.jboss.logmanager.LogManager
-                </java.util.logging.manager>
-                <jboss.home>${project.basedir}/target/wildfly-8.1.0.Final</jboss.home>
-                <module.path>${project.basedir}/target/wildfly-8.1.0.Final/modules</module.path>
+                <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+                <jboss.home>${project.build.directory}/wildfly-8.1.0.Final</jboss.home>
+                <module.path>${project.build.directory}/wildfly-8.1.0.Final/modules</module.path>
                 <jboss.server.config.file.name>standalone-full.xml</jboss.server.config.file.name>
               </systemPropertyVariables>
               <redirectTestOutputToFile>false</redirectTestOutputToFile>

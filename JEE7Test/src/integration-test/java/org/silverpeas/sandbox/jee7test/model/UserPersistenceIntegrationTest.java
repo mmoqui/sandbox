@@ -57,7 +57,7 @@ public class UserPersistenceIntegrationTest {
 
   @Inject
   private MessageBucket messageBucket;
-  @Resource
+  @Resource(lookup = "java:/datasources/jee7test")
   private DataSource dataSource;
   private DbSetupTracker dbSetupTracker = new DbSetupTracker();
 

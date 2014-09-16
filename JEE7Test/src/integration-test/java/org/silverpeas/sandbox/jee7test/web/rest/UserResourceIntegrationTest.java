@@ -47,7 +47,7 @@ public class UserResourceIntegrationTest {
       .values(1, "Rohan", "Lapointe")
       .build();
 
-  @Resource
+  @Resource(lookup = "java:/datasources/jee7test")
   private DataSource dataSource;
   private DbSetupTracker dbSetupTracker = new DbSetupTracker();
 

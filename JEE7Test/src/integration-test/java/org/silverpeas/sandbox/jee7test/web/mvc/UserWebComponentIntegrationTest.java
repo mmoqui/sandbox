@@ -46,7 +46,7 @@ public class UserWebComponentIntegrationTest {
 
   @Inject
   private UserWebComponent webComponent;
-  @Resource
+  @Resource(lookup = "java:/datasources/jee7test")
   private DataSource dataSource;
   private DbSetupTracker dbSetupTracker = new DbSetupTracker();
 
@@ -63,7 +63,8 @@ public class UserWebComponentIntegrationTest {
   public static Archive<?> createTestArchive() {
     File[] libs = Maven.resolver()
         .loadPomFromFile("pom.xml")
-        .resolve("org.mockito:mockito-all", "com.ninja-squad:DbSetup")
+        .resolve("org.mockito:mockito-all", "com.ninja-squad:DbSetup",
+            "org.silverpeas.sandbox:jee7test-component")
         .withTransitivity()
         .asFile();
     return ShrinkWrap.create(WebArchive.class, "test.war")

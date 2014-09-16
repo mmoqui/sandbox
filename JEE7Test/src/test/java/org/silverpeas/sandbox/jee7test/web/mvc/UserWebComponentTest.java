@@ -5,15 +5,21 @@ import org.junit.Test;
 import org.mockito.Answers;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.silverpeas.sandbox.jee7test.component.model.Component;
+import org.silverpeas.sandbox.jee7test.component.repository.ComponentRepository;
+import org.silverpeas.sandbox.jee7test.component.repository.ComponentRepositoryProvider;
 import org.silverpeas.sandbox.jee7test.messaging.EventNotifier;
 import org.silverpeas.sandbox.jee7test.model.User;
 import org.silverpeas.sandbox.jee7test.model.UserBuilder;
+import org.silverpeas.sandbox.jee7test.repository.UserGroupDAO;
 import org.silverpeas.sandbox.jee7test.repository.UserRepository;
 import org.silverpeas.sandbox.jee7test.repository.UserRepositoryProvider;
+import org.silverpeas.sandbox.jee7test.test.util.Reflection;
 import org.silverpeas.sandbox.jee7test.test.util.TestBeanContainer;
 import org.silverpeas.sandbox.jee7test.util.BeanContainer;
 import org.silverpeas.sandbox.jee7test.util.ServiceProvider;
 
+import java.lang.reflect.Field;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Collections;
@@ -23,6 +29,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.mock;
+import static org.silverpeas.sandbox.jee7test.component.model.ComponentBuilder
+    .mockComponentRepositoryProvider;
 import static org.silverpeas.sandbox.jee7test.model.UserBuilder.anExistingUser;
 import static org.silverpeas.sandbox.jee7test.model.UserBuilder.mockUserRepositoryProvider;
 import static org.silverpeas.sandbox.jee7test.test.util.TestBeanContainer.getMockedBeanContainer;
@@ -37,13 +45,19 @@ public class UserWebComponentTest {
   private EventNotifier eventNotifier;
 
   @Before
-  public void prepareCommonBehaviors() {
+  public void prepareCommonBehaviors() throws Exception {
     BeanContainer beanContainer = getMockedBeanContainer();
     UserRepositoryProvider userRepositoryProvider = mockUserRepositoryProvider();
+    ComponentRepositoryProvider componentRepositoryProvider = mockComponentRepositoryProvider();
     userRepository = mock(UserRepository.class);
     eventNotifier = mock(EventNotifier.class);
+    ComponentRepository componentRepository = mock(ComponentRepository.class);
+    UserGroupDAO userGroupDAO = mock(UserGroupDAO.class);
+    Field daoField = UserWebComponent.class.getDeclaredField("dao");
+    Reflection.setField(webComponent, daoField, userGroupDAO);
 
     when(userRepositoryProvider.getBean()).thenReturn(userRepository);
+    when(componentRepositoryProvider.getBean()).thenReturn(componentRepository);
     when(beanContainer.getBeanByType(EventNotifier.class)).thenReturn(eventNotifier);
     when(userRepository.getAllUsers()).thenReturn(Arrays.asList(
             anExistingUser(0, "Edouard", "Lafortin"), anExistingUser(1, "Rohan", "Lapointe"))

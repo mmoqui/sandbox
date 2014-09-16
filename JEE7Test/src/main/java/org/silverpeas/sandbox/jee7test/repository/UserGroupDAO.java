@@ -19,7 +19,7 @@ import java.util.List;
  */
 public class UserGroupDAO {
 
-  private static final String CREATE_TABLE = "create table UserGroup (id bigint not null primary key, name varchar(32) not null)";
+  private static final String CREATE_TABLE = "create table if not exists UserGroup (id bigint not null primary key, name varchar(32) not null)";
   private static final String INSERT = "insert into UserGroup (id, name) values (?, ?)";
   private static final String ALL = "select id, name from UserGroup";
   private static long currentId = 0;
