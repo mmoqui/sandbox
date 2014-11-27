@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class ComponentRepository {
 
-  @PersistenceContext(unitName = "jee7test-component")
+  @PersistenceContext
   private EntityManager entityManager;
 
   public List<Component> getAllComponents() {

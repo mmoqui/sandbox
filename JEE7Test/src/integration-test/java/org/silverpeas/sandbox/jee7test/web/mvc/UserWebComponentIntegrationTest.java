@@ -19,7 +19,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.silverpeas.sandbox.jee7test.model.User;
 import org.silverpeas.sandbox.jee7test.model.UserBuilder;
-import org.silverpeas.sandbox.jee7test.service.MessageBucket;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;

@@ -6,6 +6,8 @@
                                  http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
   <persistence-unit name="jee7test" transaction-type="JTA">
     <jta-data-source>java:/datasources/jee7test</jta-data-source>
+    <!--<jar-file>lib/jee7test-component-1.0-SNAPSHOT.jar</jar-file>-->
+    <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <properties>
       <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
       <property name="hibernate.show_sql" value="true"/>

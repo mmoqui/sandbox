@@ -18,18 +18,14 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.silverpeas.sandbox.jee7test.repository.UserRepository;
 import org.silverpeas.sandbox.jee7test.service.MessageBucket;
-import org.silverpeas.sandbox.jee7test.util.ServiceProvider;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
 import javax.sql.DataSource;
-import javax.transaction.Transactional;
 
 import java.io.File;
 import java.util.List;
-import java.util.Timer;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
