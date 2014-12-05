@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+                             http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+
+  <display-name>A WebDAV access to a JCR repository</display-name>
+
+  <listener>
+    <listener-class>org.silverpeas.sandbox.web.bootstrap.SilverpeasContextBootStrapper</listener-class>
+  </listener>
+  <listener>
+    <listener-class>org.silverpeas.sandbox.web.bootstrap.SilverpeasServiceInitialization</listener-class>
+  </listener>
+
+  <servlet>
+    <description>The webdav servlet that connects HTTP request to the repository.</description>
+    <servlet-name>Webdav</servlet-name>
+    <servlet-class>org.silverpeas.sandbox.jcr.webdav.MyJCRWebDAVServlet</servlet-class>
+    <init-param>
+      <description>Defines the prefix for spooling resources out of the repository.</description>
+      <param-name>resource-path-prefix</param-name>
+      <param-value>/repository</param-value>
+    </init-param>
+    <init-param>
+      <description>Defines various dav-resource configuration parameters.</description>
+      <param-name>resource-config</param-name>
+      <param-value>/WEB-INF/classes/webdav-config.xml</param-value>
+    </init-param>
+    <load-on-startup>4</load-on-startup>
+  </servlet>
+  <servlet>
+    <description>The webdav servlet that connects HTTP request to the repository for Office 2000.</description>
+    <servlet-name>BasicWebdav</servlet-name>
+    <servlet-class>org.silverpeas.sandbox.jcr.webdav.MyJCRWebDAVServlet</servlet-class>
+    <init-param>
+      <description>Defines the prefix for spooling resources out of the repository.</description>
+      <param-name>resource-path-prefix</param-name>
+      <param-value>/repository2000</param-value>
+    </init-param>
+    <init-param>
+      <description>Defines various dav-resource configuration parameters.</description>
+      <param-name>resource-config</param-name>
+      <param-value>/WEB-INF/classes/webdav-config.xml</param-value>
+    </init-param>
+    <load-on-startup>4</load-on-startup>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>Webdav</servlet-name>
+    <url-pattern>/repository/*</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>BasicWebdav</servlet-name>
+    <url-pattern>/repository2000/*</url-pattern>
+  </servlet-mapping>
+
+  <resource-env-ref>
+    <description>Content Repository</description>
+    <resource-env-ref-name>jcr/repository</resource-env-ref-name>
+    <resource-env-ref-type>javax.jcr.Repository</resource-env-ref-type>
+    <lookup-name>java:/jca/jcr</lookup-name>
+  </resource-env-ref>
+</web-app>
