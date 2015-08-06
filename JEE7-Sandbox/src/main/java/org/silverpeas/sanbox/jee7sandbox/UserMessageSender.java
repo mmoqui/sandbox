@@ -15,15 +15,15 @@ import javax.jms.Topic;
 @JMSDestinationDefinitions(
     value =  {
         @JMSDestinationDefinition(
-            name = "java:/topic/HELLOWORLDMDBTopic",
+            name = "java:/topic/messages",
             interfaceName = "javax.jms.Topic",
-            destinationName = "HelloWorldMDBTopic"
+            destinationName = "UserMessageListener"
         )
     }
 )
 public class UserMessageSender {
 
-  @Resource(lookup = "java:/topic/HELLOWORLDMDBTopic")
+  @Resource(lookup = "java:/topic/messages")
   private Topic topic;
 
   @Inject
