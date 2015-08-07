@@ -1,4 +1,7 @@
-package org.silverpeas.sanbox.jee7sandbox;
+package org.silverpeas.sanbox.jee7sandbox.web;
+
+import org.silverpeas.sanbox.jee7sandbox.bean.UserMessage;
+import org.silverpeas.sanbox.jee7sandbox.jms.UserMessageSender;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;

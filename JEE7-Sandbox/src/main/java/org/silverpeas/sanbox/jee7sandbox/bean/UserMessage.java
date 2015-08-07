@@ -1,4 +1,6 @@
-package org.silverpeas.sanbox.jee7sandbox;
+package org.silverpeas.sanbox.jee7sandbox.bean;
+
+import org.silverpeas.sanbox.jee7sandbox.util.BeanProvider;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -29,8 +31,8 @@ public class UserMessage implements Serializable {
    * Sets the unique identifier of this message. This method is to be used only in the case the
    * message is sent, whatever it is correctly received.
    */
-  protected void generateId() {
-    this.id = UUID.randomUUID().toString();
+  public void setId(String id) {
+    this.id = id;
   }
 
   /**

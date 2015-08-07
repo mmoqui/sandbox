@@ -1,12 +1,16 @@
-package org.silverpeas.sanbox.jee7sandbox;
+package org.silverpeas.sanbox.jee7sandbox.jms;
+
+import org.silverpeas.sanbox.jee7sandbox.bean.UserMessage;
 
 import javax.annotation.Resource;
+import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.jms.JMSContext;
 import javax.jms.JMSDestinationDefinition;
 import javax.jms.JMSDestinationDefinitions;
 import javax.jms.JMSProducer;
 import javax.jms.Topic;
+import java.util.UUID;
 
 /**
  * A sender of user message within the application.
@@ -21,6 +25,7 @@ import javax.jms.Topic;
         )
     }
 )
+@Stateless
 public class UserMessageSender {
 
   @Resource(lookup = "java:/topic/messages")
@@ -35,7 +40,7 @@ public class UserMessageSender {
    */
   public void send(UserMessage message) {
     JMSProducer producer = context.createProducer();
-    message.generateId();
+    message.setId(UUID.randomUUID().toString());
     producer.send(topic, message);
   }
 }

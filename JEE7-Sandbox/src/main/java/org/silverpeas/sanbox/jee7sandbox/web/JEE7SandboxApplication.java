@@ -1,4 +1,4 @@
-package org.silverpeas.sanbox.jee7sandbox;
+package org.silverpeas.sanbox.jee7sandbox.web;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;

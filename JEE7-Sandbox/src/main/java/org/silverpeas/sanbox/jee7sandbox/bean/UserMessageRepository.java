@@ -1,4 +1,4 @@
-package org.silverpeas.sanbox.jee7sandbox;
+package org.silverpeas.sanbox.jee7sandbox.bean;
 
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;

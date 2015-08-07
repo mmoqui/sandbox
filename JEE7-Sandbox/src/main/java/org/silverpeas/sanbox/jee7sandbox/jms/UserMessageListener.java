@@ -1,4 +1,6 @@
-package org.silverpeas.sanbox.jee7sandbox;
+package org.silverpeas.sanbox.jee7sandbox.jms;
+
+import org.silverpeas.sanbox.jee7sandbox.bean.UserMessage;
 
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
