@@ -12,14 +12,37 @@
 <body>
 <h2>Hello guy! Please send me a message</h2>
 <div class="container-fluid">
-  <div id="status" class="alert" role="alert"></div>
-  <form id="message-sending" action="javascript:sendMessage()">
-    <div class="form-group">
-      <label for="message">Your message:</label>
-      <textarea class="form-control" id="message" placeholder="Your message..." rows="5"></textarea>
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <div id="status" class="alert" role="alert"></div>
+      <form id="message-sending" action="javascript:sendMessage()">
+        <div class="form-group">
+          <label for="message">Your message:</label>
+          <textarea class="form-control" id="message" placeholder="Your message..." rows="5"></textarea>
+        </div>
+        <button type="submit" class="btn btn-default">Send</button>
+      </form>
     </div>
-    <button type="submit" class="btn btn-default">Send</button>
-  </form>
+    <div id="messages-management" class="panel-body">
+      <ul id="message-list" class="list-group">
+        <li class="list-group-item"></li>
+      </ul>
+    </div>
+  </div>
+  <div class="panel-body">
+    <form id="logging-level" action="javascript:changeLoggingLevel('UserMessage')">
+      <div class="form-group">
+        <label for="level-list">Logging Level:</label>
+        <select id="level-list">
+          <option value="DEBUG">DEBUG</option>
+          <option value="INFO">INFO</option>
+          <option value="WARN">WARNING</option>
+          <option value="ERROR">ERROR</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-default">Change</button>
+    </form>
+  </div>
 </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>

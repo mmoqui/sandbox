@@ -1,14 +1,13 @@
 package org.silverpeas.sanbox.jee7sandbox.jms;
 
 import org.silverpeas.sanbox.jee7sandbox.bean.UserMessage;
+import org.silverpeas.sanbox.jee7sandbox.util.MyLogger;
 
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * A listener of messages coming from users. It aims to persist all incoming messages.
@@ -20,13 +19,16 @@ import java.util.logging.Logger;
     @ActivationConfigProperty(propertyName = "acknowledgeMode", propertyValue = "Auto-acknowledge") })
 public class UserMessageListener implements MessageListener {
 
+  private static final MyLogger logger = MyLogger.getLogger("UserMessage");
+
   @Override
   public void onMessage(Message message) {
     try {
+      logger.info("Receive new user message:");
       UserMessage userMessage = message.getBody(UserMessage.class);
       userMessage.save();
     } catch (JMSException e) {
-      Logger.getLogger(getClass().getSimpleName()).log(Level.SEVERE, e.getMessage(), e);
+      MyLogger.getLogger(getClass().getSimpleName()).error(e.getMessage(), e);
     }
   }
 }

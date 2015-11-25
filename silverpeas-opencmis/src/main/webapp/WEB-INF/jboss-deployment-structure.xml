@@ -1,0 +1,12 @@
+<jboss-deployment-structure>
+  <deployment>
+    <exclude-subsystems>
+      <subsystem name="webservices"/>
+    </exclude-subsystems>
+    <dependencies>
+      <module name="javax.jws.api" />
+      <module name="javax.xml.soap.api" />
+      <module name="javax.xml.ws.api" />
+    </dependencies>
+  </deployment>
+</jboss-deployment-structure>

@@ -2,10 +2,12 @@ package org.silverpeas.sanbox.jee7sandbox.web;
 
 import org.silverpeas.sanbox.jee7sandbox.bean.UserMessage;
 import org.silverpeas.sanbox.jee7sandbox.jms.UserMessageSender;
+import org.silverpeas.sanbox.jee7sandbox.util.MyLogger;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -13,6 +15,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import java.util.List;
 
 /**
  * Web resource representing user messages. It is the entry point of the
@@ -22,6 +25,8 @@ import javax.ws.rs.core.UriInfo;
 @Path("/messages")
 @RequestScoped
 public class UserMessageResource {
+
+  private static final MyLogger logger = MyLogger.getLogger("UserMessage");
 
   @Context
   private UriInfo uriInfo;
@@ -40,9 +45,18 @@ public class UserMessageResource {
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
   public Response postNewUserMessage(UserMessage message) {
+    logger.info("A new user message is posted. Send it to the listeners");
     messageSender.send(message);
     return Response.created(uriInfo.getAbsolutePathBuilder().build(message.getId()))
         .entity(message)
         .build();
+  }
+
+  @GET
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response getAllUserMessages() {
+    logger.info("Get all user messages");
+    List<UserMessage> messages = UserMessage.getAll();
+    return Response.ok(messages).build();
   }
 }

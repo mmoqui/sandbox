@@ -1,0 +1,31 @@
+# Batch script to add and configure logging in the WildFly server
+
+embed-server --server-config=standalone-full.xml
+
+if (outcome == success) of /subsystem=logging/logging-profile=jee7-sandbox:read-resource
+  /subsystem=logging/logging-profile=jee7-sandbox:remove
+end-if
+
+# Start batching commands
+batch
+
+# Add the logging profile for JEE7-Sandbox application
+/subsystem=logging/logging-profile=jee7-sandbox:add
+
+# Add the periodic rotating file handlers corresponding to those added to the logging properties file
+/subsystem=logging/logging-profile=jee7-sandbox/periodic-rotating-file-handler=LOG_FILE_TRACE:add(suffix=".yyyy.MM.dd", file={"path"=>"${env.SILVERPEAS_HOME}/log/jee7-sandbox.trace.log"}, append=true)
+/subsystem=logging/logging-profile=jee7-sandbox/periodic-rotating-file-handler=LOG_FILE_TRACE:write-attribute(name=autoflush, value=true)
+/subsystem=logging/logging-profile=jee7-sandbox/periodic-rotating-file-handler=LOG_FILE_ERROR:add(level=ERROR, suffix=".yyyy.MM.dd", file={"path"=>"${env.SILVERPEAS_HOME}/log/jee7-sandbox.error.log"}, append=true)
+/subsystem=logging/logging-profile=jee7-sandbox/periodic-rotating-file-handler=LOG_FILE_ERROR:write-attribute(name=autoflush, value=true)
+
+# Configure the logging async handlers
+/subsystem=logging/logging-profile=jee7-sandbox/async-handler=ASYNC_TRACE_HANDLER:add(level=TRACE,queue-length=1024,overflow-action=BLOCK,subhandlers=["LOG_FILE_TRACE"])
+/subsystem=logging/logging-profile=jee7-sandbox/async-handler=ASYNC_ERROR_HANDLER:add(level=ERROR,queue-length=1024,overflow-action=BLOCK,subhandlers=["LOG_FILE_ERROR"])
+
+# Create the logger for our quickstart class
+### NOTE: To view different logging levels, change the level below from TRACE to DEBUG, INFO, WARN, ERROR, or FATAL, then access the application.
+/subsystem=logging/logging-profile=jee7-sandbox/logger=JEE7Sandbox:add(level=INFO,handlers=[LOG_FILE_TRACE,LOG_FILE_ERROR])
+/subsystem=logging/logging-profile=jee7-sandbox/logger=JEE7Sandbox:write-attribute(name=use-parent-handlers, value=false)
+
+# Run the batch commands
+run-batch

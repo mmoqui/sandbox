@@ -19,6 +19,12 @@
         <scope>provided</scope>
       </dependency>
       <dependency>
+        <groupId>org.jboss.logging</groupId>
+        <artifactId>jboss-logging</artifactId>
+        <version>3.3.0.Final</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
         <version>4.12</version>
@@ -30,6 +36,10 @@
     <dependency>
       <groupId>javax</groupId>
       <artifactId>javaee-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.logging</groupId>
+      <artifactId>jboss-logging</artifactId>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -50,6 +60,16 @@
             <optimize>true</optimize>
             <showDeprecation>true</showDeprecation>
             <showWarnings>true</showWarnings>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-war-plugin</artifactId>
+          <version>2.6</version>
+          <configuration>
+            <archive>
+              <manifestFile>src/main/webapp/META-INF/MANIFEST.MF</manifestFile>
+            </archive>
           </configuration>
         </plugin>
       </plugins>

@@ -1,6 +1,7 @@
 package org.silverpeas.sanbox.jee7sandbox.jms;
 
 import org.silverpeas.sanbox.jee7sandbox.bean.UserMessage;
+import org.silverpeas.sanbox.jee7sandbox.util.MyLogger;
 
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
@@ -28,6 +29,8 @@ import java.util.UUID;
 @Stateless
 public class UserMessageSender {
 
+  private static final MyLogger logger = MyLogger.getLogger("UserMessage");
+
   @Resource(lookup = "java:/topic/messages")
   private Topic topic;
 
@@ -39,8 +42,13 @@ public class UserMessageSender {
    * @param message the message to send.
    */
   public void send(UserMessage message) {
-    JMSProducer producer = context.createProducer();
-    message.setId(UUID.randomUUID().toString());
-    producer.send(topic, message);
+    logger.info("Send a user message: '" + message.getText() + "'");
+    try {
+      JMSProducer producer = context.createProducer();
+      message.setId(UUID.randomUUID().toString());
+      producer.send(topic, message);
+    } catch (Exception e) {
+      logger.error(e.getMessage(), e);
+    }
   }
 }
