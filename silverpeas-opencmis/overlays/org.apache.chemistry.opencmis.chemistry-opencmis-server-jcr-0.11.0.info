@@ -1,0 +1,3 @@
+1439978065000
+.*, META-INF/THIRD-PARTY-LICENSES
+WEB-INF/classes/sample-repository\.properties, WEB-INF/token(?:$|/.+), css(?:$|/.+), images(?:$|/.+), index\.html, web(?:$|/.+)

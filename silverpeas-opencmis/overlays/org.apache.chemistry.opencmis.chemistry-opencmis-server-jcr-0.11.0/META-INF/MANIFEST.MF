@@ -1,0 +1,20 @@
+Manifest-Version: 1.0
+Implementation-Title: OpenCMIS JCR Server Implementation
+Bundle-Classpath: .
+Implementation-Version: 0.11.0
+Built-By: mindthegab
+X-Apache-SVN-Revision: 1585091
+Bundle-Name: org.apache.chemistry.opencmis.server.jcr
+Created-By: Apache Maven 3.0.4
+Web-ContextPath: cmis-jcr
+X-Compile-Source-JDK: 1.5
+Implementation-Vendor: The Apache Software Foundation
+Implementation-Vendor-Id: org.apache.chemistry.opencmis
+Bundle-Version: 0.11.0
+Build-Jdk: 1.7.0_07
+Bundle-SymbolicName: org.apache.chemistry.opencmis.server.jcr
+Import-Package: javax.servlet,javax.servlet.http,javax.servlet.resourc
+ es
+X-Compile-Target-JDK: 1.5
+Archiver-Version: Plexus Archiver
+
