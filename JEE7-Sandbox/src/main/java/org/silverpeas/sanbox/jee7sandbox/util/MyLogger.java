@@ -48,11 +48,11 @@ public class MyLogger {
   }
 
   public void debug(String msg) {
-    this.logger.log(Level.FINER, msg);
+    this.logger.log(Level.FINE, msg);
   }
 
   public void debug(String msg, Throwable t) {
-    this.logger.log(Level.FINER, msg, t);
+    this.logger.log(Level.FINE, msg, t);
   }
 
   public void warn(String msg) {

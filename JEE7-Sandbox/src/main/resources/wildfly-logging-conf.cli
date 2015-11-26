@@ -13,9 +13,9 @@ batch
 /subsystem=logging/logging-profile=jee7-sandbox:add
 
 # Add the periodic rotating file handlers corresponding to those added to the logging properties file
-/subsystem=logging/logging-profile=jee7-sandbox/periodic-rotating-file-handler=LOG_FILE_TRACE:add(suffix=".yyyy.MM.dd", file={"path"=>"${env.SILVERPEAS_HOME}/log/jee7-sandbox.trace.log"}, append=true)
+/subsystem=logging/logging-profile=jee7-sandbox/periodic-rotating-file-handler=LOG_FILE_TRACE:add(level="DEBUG",suffix=".yyyy.MM.dd", file={"path"=>"${env.SILVERPEAS_HOME}/log/jee7-sandbox.trace.log"}, append=true)
 /subsystem=logging/logging-profile=jee7-sandbox/periodic-rotating-file-handler=LOG_FILE_TRACE:write-attribute(name=autoflush, value=true)
-/subsystem=logging/logging-profile=jee7-sandbox/periodic-rotating-file-handler=LOG_FILE_ERROR:add(level=ERROR, suffix=".yyyy.MM.dd", file={"path"=>"${env.SILVERPEAS_HOME}/log/jee7-sandbox.error.log"}, append=true)
+/subsystem=logging/logging-profile=jee7-sandbox/periodic-rotating-file-handler=LOG_FILE_ERROR:add(level="ERROR",suffix=".yyyy.MM.dd", file={"path"=>"${env.SILVERPEAS_HOME}/log/jee7-sandbox.error.log"}, append=true)
 /subsystem=logging/logging-profile=jee7-sandbox/periodic-rotating-file-handler=LOG_FILE_ERROR:write-attribute(name=autoflush, value=true)
 
 # Configure the logging async handlers
@@ -24,7 +24,7 @@ batch
 
 # Create the logger for our quickstart class
 ### NOTE: To view different logging levels, change the level below from TRACE to DEBUG, INFO, WARN, ERROR, or FATAL, then access the application.
-/subsystem=logging/logging-profile=jee7-sandbox/logger=JEE7Sandbox:add(level=INFO,handlers=[LOG_FILE_TRACE,LOG_FILE_ERROR])
+/subsystem=logging/logging-profile=jee7-sandbox/logger=JEE7Sandbox:add(level="INFO",handlers=[LOG_FILE_TRACE,LOG_FILE_ERROR])
 /subsystem=logging/logging-profile=jee7-sandbox/logger=JEE7Sandbox:write-attribute(name=use-parent-handlers, value=false)
 
 # Run the batch commands

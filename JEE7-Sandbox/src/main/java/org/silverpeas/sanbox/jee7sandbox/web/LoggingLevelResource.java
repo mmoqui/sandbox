@@ -40,7 +40,7 @@ public class LoggingLevelResource {
   public LoggingModule updateLoggingModule(LoggingModule updatedLoggingModule) {
     if (module != null && module.equals(updatedLoggingModule.getModule())) {
       MyLogger logger = MyLogger.getLogger(module);
-      Level level = Level.parse(updatedLoggingModule.getLevel());
+      Level level = LoggingLevel.valueOf(updatedLoggingModule.getLevel()).toJavaLoggingLevel();
       logger.setLevel(level);
       return updatedLoggingModule;
     } else {

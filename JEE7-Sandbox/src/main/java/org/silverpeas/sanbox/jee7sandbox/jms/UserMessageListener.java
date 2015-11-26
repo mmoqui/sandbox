@@ -24,8 +24,11 @@ public class UserMessageListener implements MessageListener {
   @Override
   public void onMessage(Message message) {
     try {
-      logger.info("Receive new user message:");
       UserMessage userMessage = message.getBody(UserMessage.class);
+      logger.debug("Receive new user message: " + userMessage.getText());
+      logger.info("Receive new user message: " + userMessage.getText());
+      logger.warn("Receive new user message: " + userMessage.getText());
+      logger.error("Receive new user message: " + userMessage.getText());
       userMessage.save();
     } catch (JMSException e) {
       MyLogger.getLogger(getClass().getSimpleName()).error(e.getMessage(), e);

@@ -35,7 +35,8 @@ public enum LoggingLevel {
   ERROR;
 
   public static LoggingLevel fromJavaLoggingLevel(final Level level) {
-    if (level.intValue() == Level.FINE.intValue()) {
+    if (level.intValue() == Level.FINE.intValue() || level.intValue() == Level.FINEST.intValue()
+        || level.intValue() == Level.FINER.intValue()) {
       return DEBUG;
     } else if (level.intValue() == Level.WARNING.intValue()) {
       return WARN;
