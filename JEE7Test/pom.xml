@@ -273,7 +273,7 @@
     <jcr.home>${env.HOME}/tmp/jcr</jcr.home>
     <jcr.conf>${jcr.home}/repository.xml</jcr.conf>
     <wildfly.version>8.1.0.Final</wildfly.version>
-    <jackrabbit.version>2.8.0</jackrabbit.version>
+    <jackrabbit.version>2.8.1</jackrabbit.version>
   </properties>
 
   <build>
