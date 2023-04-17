@@ -114,7 +114,7 @@
   </build>
   <properties>
     <resteasy.version>3.0.8.Final</resteasy.version>
-    <spring.version>5.3.14</spring.version>
+    <spring.version>5.3.27</spring.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
